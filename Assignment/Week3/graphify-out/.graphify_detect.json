@@ -1,0 +1,27 @@
+{
+  "files": {
+    "code": [
+      "/Users/dolphin/Desktop/Machine_Learning/Assignment/Week3/bias_variance_lab_compact.py",
+      "/Users/dolphin/Desktop/Machine_Learning/Assignment/Week3/results.json",
+      "/Users/dolphin/Desktop/Machine_Learning/Assignment/Week3/bias_variance_lab.py",
+      "/Users/dolphin/Desktop/Machine_Learning/Assignment/Week3/Slide/create_slides.py"
+    ],
+    "document": [
+      "/Users/dolphin/Desktop/Machine_Learning/Assignment/Week3/index.html",
+      "/Users/dolphin/Desktop/Machine_Learning/Assignment/Week3/README.md"
+    ],
+    "paper": [],
+    "image": [
+      "/Users/dolphin/Desktop/Machine_Learning/Assignment/Week3/plots/average_fit.png",
+      "/Users/dolphin/Desktop/Machine_Learning/Assignment/Week3/plots/learning_curve.png"
+    ],
+    "video": []
+  },
+  "total_files": 8,
+  "total_words": 32961,
+  "needs_graph": false,
+  "warning": "Corpus is ~32,961 words - fits in a single context window. You may not need a graph.",
+  "skipped_sensitive": [],
+  "graphifyignore_patterns": 1,
+  "scan_root": "/Users/dolphin/Desktop/Machine_Learning/Assignment/Week3"
+}
