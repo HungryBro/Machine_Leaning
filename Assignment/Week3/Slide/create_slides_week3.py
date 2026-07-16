@@ -1,7 +1,7 @@
 """สร้างสไลด์ภาษาไทยสำหรับ Bias–Variance Lab.
 
 รันจากโฟลเดอร์ใดก็ได้:
-    python3 Assignment/Week3/Slide/create_slides.py
+    python3 Assignment/Week3/Slide/create_slides_week3.py
 
 จุดสำคัญคือภาพทุกภาพถูกวางแบบ contain โดยคงสัดส่วนเดิม
 จึงไม่ถูกยืดหรือถูกตัดขอบเมื่อใส่ลงในสไลด์ 16:9
@@ -20,7 +20,7 @@ from pptx.util import Inches, Pt
 BASE_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = BASE_DIR.parent
 PLOTS_DIR = PROJECT_DIR / "plots"
-OUTPUT = BASE_DIR / "Bias_Variance_Updated.pptx"
+OUTPUT = BASE_DIR / "slides_Week3.pptx"
 
 SLIDE_W, SLIDE_H = 13.333, 7.5
 
@@ -219,46 +219,54 @@ def add_results_slide(prs, target, rows, takeaway, page, kicker):
     add_text(slide, "ค่าเฉลี่ยจากการสุ่มชุดข้อมูลฝึก n = 2 จำนวน 50,000 ชุด",
              0.72, 1.25, 7.5, 0.3, size=13, color=MUTED, margin=0)
 
-    x, y, w, h = 0.62, 1.58, 12.08, 2.48
-    table = slide.shapes.add_table(len(rows) + 1, 4, Inches(x), Inches(y), Inches(w), Inches(h)).table
-    col_widths = [3.55, 2.8, 3.0, 2.73]
+    x, y, w, h = 0.62, 1.58, 12.08, 2.78
+    table = slide.shapes.add_table(len(rows) + 2, 5, Inches(x), Inches(y), Inches(w), Inches(h)).table
+    col_widths = [2.75, 2.05, 2.1, 2.45, 2.73]
     for idx, width in enumerate(col_widths):
         table.columns[idx].width = Inches(width)
-    headers = ["โมเดล", "Bias²", "Variance", "Eout"]
-    for j, value in enumerate(headers):
-        cell = table.cell(0, j)
-        cell.text = value
-        cell.fill.solid()
-        cell.fill.fore_color.rgb = GREEN
-        cell.vertical_anchor = MSO_ANCHOR.MIDDLE
-        cell.margin_left = Inches(0.08)
-        cell.margin_right = Inches(0.08)
-        p = cell.text_frame.paragraphs[0]
-        p.alignment = PP_ALIGN.CENTER if j else PP_ALIGN.LEFT
-        for run in p.runs:
-            set_font(run, 15, WHITE, True)
-    min_eout = min(float(row[-1]) for row in rows)
-    for i, row in enumerate(rows, start=1):
-        is_best = float(row[-1]) == min_eout
-        for j, value in enumerate(row):
-            cell = table.cell(i, j)
-            cell.text = str(value)
-            cell.fill.solid()
-            cell.fill.fore_color.rgb = WHITE if is_best else (LIGHT if i % 2 == 0 else WHITE)
-            cell.vertical_anchor = MSO_ANCHOR.MIDDLE
-            cell.margin_left = Inches(0.08)
-            cell.margin_right = Inches(0.08)
-            p = cell.text_frame.paragraphs[0]
-            p.alignment = PP_ALIGN.CENTER if j else PP_ALIGN.LEFT
-            for run in p.runs:
-                set_font(run, 15, NAVY if is_best else INK, is_best)
 
-    add_text(slide, "ข้อสังเกต", 0.62, 4.38, 3.2, 0.3, size=18, color=INK, bold=True, margin=0)
+    def style_cell(cell, text, fill, color, size=12, bold=False, align=PP_ALIGN.CENTER):
+        cell.text = text
+        cell.fill.solid()
+        cell.fill.fore_color.rgb = fill
+        cell.vertical_anchor = MSO_ANCHOR.MIDDLE
+        cell.margin_left = Inches(0.06)
+        cell.margin_right = Inches(0.06)
+        cell.margin_top = Inches(0.02)
+        cell.margin_bottom = Inches(0.02)
+        p = cell.text_frame.paragraphs[0]
+        p.alignment = align
+        for run in p.runs:
+            set_font(run, size, color, bold)
+
+    # Two-level header makes the source of each value immediately clear.
+    model_header = table.cell(0, 0)
+    model_header.merge(table.cell(1, 0))
+    style_cell(model_header, "โมเดล", GREEN, WHITE, 12, True, PP_ALIGN.LEFT)
+    hand_header = table.cell(0, 1)
+    hand_header.merge(table.cell(0, 3))
+    style_cell(hand_header, "คำนวณมือ", MUTED, WHITE, 12, True)
+    style_cell(table.cell(0, 4), "จากโค้ด\nsimulation", GREEN, WHITE, 12, True)
+    for j, value in enumerate(["Bias²", "Variance", "Eout (มือ)", "Eout (โค้ด)"] , start=1):
+        fill = rgb("F1F3F5") if j < 4 else rgb("E8F5E9")
+        style_cell(table.cell(1, j), value, fill, INK, 11, True)
+
+    min_eout = min(float(row[4]) for row in rows)
+    for i, row in enumerate(rows, start=1):
+        data_row = i + 1
+        is_best = float(row[4]) == min_eout
+        base_fill = WHITE if i % 2 else LIGHT
+        style_cell(table.cell(data_row, 0), row[0], base_fill, NAVY if is_best else INK, 12, is_best, PP_ALIGN.LEFT)
+        for j, value in enumerate(row[1:5], start=1):
+            fill = rgb("DFF2E3") if is_best and j == 4 else (rgb("EDF7EF") if j == 4 else base_fill)
+            style_cell(table.cell(data_row, j), str(value), fill, NAVY if is_best else INK, 12, is_best)
+
+    add_text(slide, "ข้อสังเกต", 0.62, 4.42, 3.2, 0.3, size=18, color=INK, bold=True, margin=0)
     add_rect(slide, 0.62, 4.82, 0.06, 1.1, RED)
     add_text(slide, takeaway.replace("\n", "  "), 0.9, 4.83, 11.55, 0.86,
              size=16, color=INK, margin=0)
-    add_text(slide, "สีเขียว = Eout ต่ำสุดในเป้าหมายนี้  |  Bias² ต่ำอย่างเดียวไม่พอ ถ้า Variance สูง Eout อาจแย่ลงได้",
-             0.62, 6.27, 12.0, 0.3, size=11, color=MUTED, margin=0)
+    add_text(slide, "คำนวณมือ: จาก คำนวณมือ.pdf  |  โค้ด: simulation จาก results.json  |  สีเขียวอ่อน = Eout จากโค้ดต่ำสุด",
+             0.62, 6.27, 12.0, 0.3, size=10, color=MUTED, margin=0)
     return slide
 
 
@@ -294,14 +302,14 @@ def build_deck():
     add_title_slide(prs)
     add_concept_slide(prs)
     add_results_slide(prs, "sin(πx)", [
-        ["Constant", "0.4983", "0.2500", "0.7483"],
-        ["Linear", "0.2080", "1.6755", "1.8835"],
-        ["Linear ผ่านจุดกำเนิด", "0.2755", "0.2380", "0.5135"],
+        ["Constant", "0.5000", "0.2500", "0.7500", "0.7491"],
+        ["Linear", "0.2060", "1.6703", "1.8763", "1.8625"],
+        ["Linear ผ่านจุดกำเนิด", "0.2718", "0.2372", "0.5090", "0.5151"],
     ], "Linear มี Bias² ต่ำ\nแต่ Variance สูงมาก\n\nผู้ชนะ: Linear ผ่านจุดกำเนิด\nเพราะ Eout ต่ำสุด", 3, "02  ผลลัพธ์ Bias-Variance")
     add_results_slide(prs, "x²", [
-        ["Constant", "0.0901", "0.0445", "0.1346"],
-        ["Linear", "0.2017", "0.3324", "0.5342"],
-        ["Linear ผ่านจุดกำเนิด", "0.2027", "0.1158", "0.3185"],
+        ["Constant", "0.0889", "0.0444", "0.1333", "0.1346"],
+        ["Linear", "0.2000", "0.3333", "0.5333", "0.5414"],
+        ["Linear ผ่านจุดกำเนิด", "0.2000", "0.1147", "0.3147", "0.3182"],
     ], "Constant ชนะอย่างชัดเจน\nเพราะ x² สมมาตร\n\nความซับซ้อนเพิ่มขึ้น\nไม่ได้ช่วยให้ Eout ต่ำลง", 4, "02  ผลลัพธ์ Bias-Variance")
     add_image_slide(prs, "ภาพรวม: โมเดลเฉลี่ยและความแกว่ง", PLOTS_DIR / "average_fit.png",
                     "เส้นเขียว = เป้าหมายจริง  |  เส้นประแดง = โมเดลเฉลี่ย  |  แถบแดง = ±1 std  |  เส้นเทา = ตัวอย่างโมเดลจากชุดข้อมูลต่างกัน",
