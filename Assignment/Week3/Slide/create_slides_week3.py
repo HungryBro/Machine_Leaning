@@ -220,7 +220,7 @@ def add_results_slide(prs, target, rows, takeaway, page, kicker):
              0.72, 1.25, 7.5, 0.3, size=13, color=MUTED, margin=0)
 
     x, y, w, h = 0.62, 1.58, 12.08, 2.78
-    table = slide.shapes.add_table(len(rows) + 2, 5, Inches(x), Inches(y), Inches(w), Inches(h)).table
+    table = slide.shapes.add_table(len(rows) + 1, 5, Inches(x), Inches(y), Inches(w), Inches(h)).table
     col_widths = [2.75, 2.05, 2.1, 2.45, 2.73]
     for idx, width in enumerate(col_widths):
         table.columns[idx].width = Inches(width)
@@ -239,21 +239,15 @@ def add_results_slide(prs, target, rows, takeaway, page, kicker):
         for run in p.runs:
             set_font(run, size, color, bold)
 
-    # Two-level header makes the source of each value immediately clear.
-    model_header = table.cell(0, 0)
-    model_header.merge(table.cell(1, 0))
-    style_cell(model_header, "โมเดล", GREEN, WHITE, 12, True, PP_ALIGN.LEFT)
-    hand_header = table.cell(0, 1)
-    hand_header.merge(table.cell(0, 3))
-    style_cell(hand_header, "คำนวณมือ", MUTED, WHITE, 12, True)
-    style_cell(table.cell(0, 4), "จากโค้ด\nsimulation", GREEN, WHITE, 12, True)
-    for j, value in enumerate(["Bias²", "Variance", "Eout (มือ)", "Eout (โค้ด)"] , start=1):
-        fill = rgb("F1F3F5") if j < 4 else rgb("E8F5E9")
-        style_cell(table.cell(1, j), value, fill, INK, 11, True)
+    # Single-level header
+    headers = ["โมเดล", "Bias² (มือ)", "Variance (มือ)", "Eout (มือ)", "Eout (sim)"]
+    for j, val in enumerate(headers):
+        align = PP_ALIGN.LEFT if j == 0 else PP_ALIGN.CENTER
+        style_cell(table.cell(0, j), val, GREEN, WHITE, 12, True, align)
 
     min_eout = min(float(row[4]) for row in rows)
     for i, row in enumerate(rows, start=1):
-        data_row = i + 1
+        data_row = i
         is_best = float(row[4]) == min_eout
         base_fill = WHITE if i % 2 else LIGHT
         style_cell(table.cell(data_row, 0), row[0], base_fill, NAVY if is_best else INK, 12, is_best, PP_ALIGN.LEFT)
