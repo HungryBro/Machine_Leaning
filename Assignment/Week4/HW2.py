@@ -3,58 +3,48 @@
 import os
 import numpy as np
 import pandas as pd
-import matplotlib
+import matplotlib 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-np.random.seed(42)
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'plots')
+np.random.seed(42) 
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'plots')  #สร้างโฟลเดอร์ไว้เก็บรูปกราฟ
 os.makedirs(OUT, exist_ok=True)
 
-f = lambda x: np.sin(np.pi * x)
+f = lambda x: np.sin(np.pi * x)    #กำหนดฟังก์ชันจริงของข้อมูล
 MODELS = ['Constant', 'Linear']
-XG = np.linspace(-1, 1, 4000)          # grid for a precise "true" E_out
-
+XG = np.linspace(-1, 1, 4000)   #สร้างจุด 4000 จุดไว้คำนวณ True E_out ให้แม่นยำ       
 
 def gen_data(n, sigma):
     X = np.random.uniform(-1, 1, n)
     return X, f(X) + np.random.normal(0, sigma, n)
 
-
-def fit_predict(model, X, y, xq):
+def fit_predict(model, X, y, xq):  #Train โมเดลและทำนาย
     if model == 'Constant':
-        return np.full_like(xq, y.mean())
-    w = np.linalg.lstsq(np.column_stack([np.ones(len(X)), X]), y, rcond=None)[0]
-    return w[0] + w[1] * xq
+        return np.full_like(xq, y.mean()) #ทำนายทุกตัวเป็นค่าเฉลี่ยของ y
+    w = np.linalg.lstsq(np.column_stack([np.ones(len(X)), X]), y, rcond=None)[0] #หาสมการ จากข้อมูล Train
+    return w[0] + w[1] * xq #นำสมการไปทำนายข้อมูลใหม่
 
+def true_eout(model, X, y, sigma): # คำนวณ Out-of-sample Error ที่แท้จริงใช้ 4000 จุดบน XG
+    return np.mean((fit_predict(model, X, y, XG) - f(XG)) ** 2) + sigma ** 2 #ให้โมเดลทำนายทุกจุด วัด Error ระหว่าง Prediction กับ ฟังก์ชันจริง บวก Noise Variance
 
-def true_eout(model, X, y, sigma):
-    return np.mean((fit_predict(model, X, y, XG) - f(XG)) ** 2) + sigma ** 2
-
-
-def resub(model, X, y):
-    return np.mean((fit_predict(model, X, y, X) - y) ** 2)
-
+def resub(model, X, y): 
+    return np.mean((fit_predict(model, X, y, X) - y) ** 2) #ใช้ข้อมูลเดิมทั้งTrainและTest
 
 def holdout(model, X, y, frac=0.7):
-    n = len(X); idx = np.random.permutation(n)
-    nt = min(max(int(round(frac * n)), 1), n - 1)
-    tr, te = idx[:nt], idx[nt:]
+    n = len(X); idx = np.random.permutation(n) #สลับลำดับข้อมูลแบบสุ่ม
+    nt = min(max(int(round(frac * n)), 1), n - 1) #คำนวณจำนวนข้อสอบที่จะให้ฝึก
+    tr, te = idx[:nt], idx[nt:]  #แบ่งกองข้อมูล
     return np.mean((fit_predict(model, X[tr], y[tr], X[te]) - y[te]) ** 2)
 
-
-def kfold(model, X, y, k=5):
+def kfold(model, X, y, k=5):  #แบงข้อมูลเป็น k ส่วนแล้วเฉลี่ย Error ของแต่ละ Fold
     n = len(X); k = max(2, min(k, n))
     folds = np.array_split(np.random.permutation(n), k)
-    errs = []
-    for i in range(k):
-        train_idx = np.concatenate([folds[j] for j in range(k) if j != i])
-        pred = fit_predict(model, X[train_idx], y[train_idx], X[folds[i]])
-        errs.append(np.mean((pred - y[folds[i]]) ** 2))
+    errs = [np.mean((fit_predict(model, X[tr := np.concatenate([folds[j] for j in range(k) if j != i])],
+                                  y[tr], X[folds[i]]) - y[folds[i]]) ** 2) for i in range(k)]
     return np.mean(errs)
 
-
-def run(model, n, sigma, frac=0.7, k=5, reps=2000):
+def run(model, n, sigma, frac=0.7, k=5, reps=2000): # ทดลองหลายๆครั้ง
     rows = []
     for _ in range(reps):
         X, y = gen_data(n, sigma)
@@ -62,23 +52,21 @@ def run(model, n, sigma, frac=0.7, k=5, reps=2000):
                       holdout(model, X, y, frac), kfold(model, X, y, k)))
     return pd.DataFrame(rows, columns=['true', 'Resub', 'Holdout', 'KFold'])
 
-
-def bias_var(df):
-    diff = df[['Resub', 'Holdout', 'KFold']].sub(df['true'], axis=0)
+def bias_var(df): #คำนวณ Bias, Variance และ MSE 
+    diff = df[['Resub', 'Holdout', 'KFold']].sub(df['true'], axis=0) #หาความต่างระหว่างค่าประมาณกับค่าจริง
     return pd.DataFrame({'bias': diff.mean(), 'var': df[['Resub', 'Holdout', 'KFold']].var(),
-                          'mse': (diff ** 2).mean()})
-
+                          'mse': (diff ** 2).mean()}) # ค่าเฉลี่ยกำลังสองของ Error 
 
 # ---------- 1) single dataset ----------
 print('### 1) Single dataset: estimate vs true E_out ###')
 for m in MODELS:
-    X, y = gen_data(20, 0.3)
+    X, y = gen_data(20, 0.3) #สร้างข้อมูล 20 จุดแล้วเปรียบเทียบ True Resub Holdout KFold เพื่อดูความแตกต่างของแต่ละวิธี
     print(f"{m:9s} true={true_eout(m,X,y,0.3):.3f}  resub={resub(m,X,y):.3f}  "
           f"holdout={holdout(m,X,y):.3f}  kfold={kfold(m,X,y):.3f}")
 
 # ---------- 2) bias / variance / mse ----------
-print('\n### 2) Bias / Variance / MSE over many datasets ###')
-dfs = {m: run(m, 20, 0.3, reps=2000) for m in MODELS}
+print('\n### 2) Bias / Variance / MSE over many datasets ###') 
+dfs = {m: run(m, 20, 0.3, reps=2000) for m in MODELS} # สร้างข้อมูล 2000 datasets สำหรับคำนวณ Bias Variance MSE ของแต่ละวิธี
 for m in MODELS:
     print(f'\n{m}\n{bias_var(dfs[m]).round(4)}')
 
@@ -91,10 +79,10 @@ plt.tight_layout(); plt.savefig(f'{OUT}/part2.png', dpi=150); plt.close()
 
 # ---------- 3) effect of holdout split ratio & k ----------
 print('\n### 3) Effect of split ratio (holdout) and k (k-fold) ###')
-fracs, ks = [0.1, 0.3, 0.5, 0.7, 0.9], [2, 5, 10, 20]
+fracs, ks = [0.1, 0.3, 0.5, 0.7, 0.9], [2, 5, 10, 20] #ทดลองแบ่งข้อมูล Holdout เป็น 10%,30%,50%,70%,90% ดูว่า Bias Variance เปลี่ยนอย่างไร 
 
 
-def sweep(model, kind, values, n=20, sigma=0.3, reps=1000):
+def sweep(model, kind, values, n=20, sigma=0.3, reps=1000): #สร้างข้อมูลหลายๆชุดแล้วคำนวณ Bias Variance เก็บไว้วาดกราฟ
     data = [gen_data(n, sigma) for _ in range(reps)]
     truth = np.array([true_eout(model, X, y, sigma) for X, y in data])
     out = []
@@ -105,7 +93,7 @@ def sweep(model, kind, values, n=20, sigma=0.3, reps=1000):
     return np.array(out)
 
 
-fig, axes = plt.subplots(2, 4, figsize=(16, 7))
+fig, axes = plt.subplots(2, 4, figsize=(16, 7))  #การสร้างกราฟ Bias Variance ของ Holdout และ KFold สำหรับแต่ละโมเดล
 for row, m in enumerate(MODELS):
     hb, hv = sweep(m, 'frac', fracs).T
     kb, kv = sweep(m, 'k', ks).T
@@ -123,11 +111,11 @@ plt.tight_layout(); plt.savefig(f'{OUT}/part3.png', dpi=150); plt.close()
 
 # ---------- 4) effect of n and sigma ----------
 print('\n### 4) Effect of n and sigma on bias/variance ###')
-n_list, sigma_list = [5, 10, 20, 50, 100], [0.0, 0.2, 0.4, 0.6, 0.8]
+n_list, sigma_list = [5, 10, 20, 50, 100], [0.0, 0.2, 0.4, 0.6, 0.8] # กำหนดตัวแปรต้นที่ต้องการศึกษา 
 
 fig, axes = plt.subplots(2, 4, figsize=(18, 7))
 for row, m in enumerate(MODELS):
-    bv_n = [bias_var(run(m, n, 0.3, reps=800)) for n in n_list]
+    bv_n = [bias_var(run(m, n, 0.3, reps=800)) for n in n_list] # รันการทดลอง (Simulation แบบ List Comprehension)
     bv_s = [bias_var(run(m, 20, s, reps=800)) for s in sigma_list]
     print(f'\n{m} vs n (sigma=0.3):')
     print(pd.concat({n: bv['bias'] for n, bv in zip(n_list, bv_n)}, axis=1).round(4))
