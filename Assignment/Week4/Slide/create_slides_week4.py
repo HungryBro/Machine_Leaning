@@ -237,7 +237,7 @@ def add_results_table_slide(prs):
              "Resubstitution มีแนวโน้มประเมิน error ต่ำกว่าค่า true Eout เพราะใช้ข้อมูลชุดฝึกเดิมในการทดสอบ\n"
              "ส่วน Holdout แปรผันตามการแบ่งข้อมูล และ K-Fold ใช้ข้อมูลได้คุ้มกว่าด้วยการสลับ validation fold",
              0.9, 4.59, 11.55, 0.88, size=16, color=INK, margin=0)
-    add_text(slide, "หมายเหตุ: ตารางนี้ไม่มีการคำนวณมือ — ใช้ค่าจาก single dataset ใน HW2.py โดยตรง",
+    add_text(slide, "นิยามเดียวกับ Week3: Eout = signal error + Noise²  |  ตัวเลขต่างกันเพราะ Week3 ใช้ n=2, σ=0 แต่ Week4 ใช้ n=20, σ=0.3",
              0.62, 6.27, 12.0, 0.3, size=10, color=MUTED, margin=0)
     add_footer(slide, 4)
     return slide
