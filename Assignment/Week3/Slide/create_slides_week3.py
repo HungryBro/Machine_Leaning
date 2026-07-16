@@ -70,7 +70,7 @@ def add_text(slide, text, x, y, w, h, size=18, color=INK, bold=False,
     return box
 
 
-def add_rect(slide, x, y, w, h, fill, radius=False, line=None):
+def add_rect(slide, x, y, w, h, fill, radius=False, line=None, line_width=Pt(1)):
     shape_type = MSO_SHAPE.ROUNDED_RECTANGLE if radius else MSO_SHAPE.RECTANGLE
     shape = slide.shapes.add_shape(shape_type, Inches(x), Inches(y), Inches(w), Inches(h))
     shape.fill.solid()
@@ -79,7 +79,7 @@ def add_rect(slide, x, y, w, h, fill, radius=False, line=None):
         shape.line.fill.background()
     else:
         shape.line.color.rgb = line
-        shape.line.width = Pt(1)
+        shape.line.width = line_width
     return shape
 
 
@@ -106,7 +106,7 @@ def add_header(slide, title, page, kicker=None):
 
 
 def add_card(slide, x, y, w, h, title, body, accent=TEAL,
-             fill=LIGHT, title_size=14, body_size=16, radius=True):
+             fill=LIGHT, title_size=14, body_size=16, radius=False):
     add_rect(slide, x, y, w, h, fill, radius=radius)
     add_rect(slide, x, y, 0.08, h, accent, radius=False)
     add_text(slide, title, x + 0.22, y + 0.16, w - 0.4, 0.28,
@@ -192,10 +192,16 @@ def add_setup_slide(prs):
 def add_concept_slide(prs):
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     add_header(slide, "อ่านผลอย่างไร: Bias–Variance Decomposition", 2, "01  บทนำ")
-    add_rect(slide, 0.75, 1.45, 11.85, 0.88, LIGHT, radius=True)
+    add_rect(slide, 0.75, 1.45, 11.85, 0.88, LIGHT, radius=False)
     add_text(slide, "E_out  =  Bias²  +  Variance  +  Noise²", 0.95, 1.68, 11.45, 0.38,
              size=25, color=INK, bold=True, align=PP_ALIGN.CENTER, valign=MSO_ANCHOR.MIDDLE, margin=0)
     add_text(slide, "นิยามสำคัญ", 0.75, 2.75, 3.5, 0.32, size=18, color=INK, bold=True, margin=0)
+    # กรอบสี่เหลี่ยมมุมฉากแบบสีเป็นกลาง ไม่ใช้เส้นกรอบสีจัดจ้าน
+    neutral_line = rgb("DEE2E6")
+    border_width = Inches(0.06)
+    add_rect(slide, 0.75, 3.1, 3.72, 2.28, WHITE, line=neutral_line, line_width=border_width)
+    add_rect(slide, 4.78, 3.1, 3.72, 2.28, WHITE, line=neutral_line, line_width=border_width)
+    add_rect(slide, 8.81, 3.1, 3.78, 2.28, WHITE, line=neutral_line, line_width=border_width)
     add_rect(slide, 0.75, 3.2, 0.06, 2.1, TEAL)
     add_text(slide, "Bias²  |  ความเอนเอียง", 1.0, 3.22, 3.45, 0.3, size=16, color=TEAL, bold=True, margin=0)
     add_text(slide, "โมเดลเฉลี่ยห่างจาก\nฟังก์ชันเป้าหมายแค่ไหน\n\nสูง = โมเดลเรียบเกินไป", 1.0, 3.62, 3.25, 1.35, size=15, color=INK, margin=0)
@@ -205,7 +211,7 @@ def add_concept_slide(prs):
     add_rect(slide, 8.81, 3.2, 0.06, 2.1, RED)
     add_text(slide, "Noise²  |  สัญญาณรบกวน", 9.06, 3.22, 3.25, 0.3, size=16, color=RED, bold=True, margin=0)
     add_text(slide, "ความคลาดเคลื่อนที่ลดไม่ได้\nจากข้อมูลที่มี noise\n\nσ เพิ่ม → Eout สูงขึ้น", 9.06, 3.62, 3.1, 1.35, size=15, color=INK, margin=0)
-    add_rect(slide, 1.35, 5.72, 10.65, 0.72, GREEN, radius=True)
+    add_rect(slide, 1.35, 5.72, 10.65, 0.72, GREEN, radius=False)
     add_text(slide, "ประเด็นสำคัญ: เป้าหมายคือ Eout ต่ำ ไม่ใช่แค่ Ein ต่ำบนชุดฝึก",
              1.62, 5.92, 10.1, 0.25, size=16, color=WHITE, bold=True,
              align=PP_ALIGN.CENTER, margin=0)
@@ -280,7 +286,7 @@ def add_summary_slide(prs):
     add_card(slide, 0.72, 1.42, 3.72, 3.35, "01  โมเดลซับซ้อน", "Linear fit ผ่านจุดฝึก 2 จุดได้ดีมาก\n\nแต่ sin(πx) ทำให้ Variance สูงถึงประมาณ 1.67\n\n→ Ein ต่ำ ไม่ได้แปลว่า Eout ต่ำ", ORANGE, PALE_ORANGE, 15, 19)
     add_card(slide, 4.8, 1.42, 3.72, 3.35, "02  โครงสร้างเป้าหมายสำคัญ", "สำหรับ x² ซึ่งสมมาตรบน [-1, 1]\n\nConstant มี Eout ต่ำสุดประมาณ 0.13\n\n→ เลือกโมเดลให้เข้ากับรูปทรงของข้อมูล", TEAL, PALE_TEAL, 15, 19)
     add_card(slide, 8.88, 1.42, 3.72, 3.35, "03  เพิ่มข้อมูลช่วยลด variance", "เมื่อ n เพิ่มขึ้น Ein และ Eout ค่อย ๆ เข้าใกล้กัน\n\nNoise ทำให้ Eout สูงขึ้น\nแต่ไม่เปลี่ยนแนวโน้มหลัก", GREEN, LIGHT, 15, 19)
-    add_rect(slide, 1.2, 5.45, 10.95, 0.95, NAVY, radius=True)
+    add_rect(slide, 1.2, 5.45, 10.95, 0.95, NAVY, radius=False)
     add_text(slide, "ประโยคสรุปสำหรับการนำเสนอ", 1.5, 5.64, 2.7, 0.22, size=11,
              color=TEAL, bold=True, margin=0)
     add_text(slide, "เราต้องบาลานซ์ความเรียบง่ายของโมเดลกับความสามารถในการจับรูปแบบ\nเพื่อให้โมเดลทำงานได้ดีกับข้อมูลใหม่ ไม่ใช่แค่ข้อมูลที่ใช้ฝึก",

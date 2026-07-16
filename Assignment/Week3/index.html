@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 3 — Generalization & Learning Curves</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .plot-box {
+            min-height: 360px;
+        }
+        .katex {
+            font-size: 1.05em;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        .tab-btn {
+            @apply px-4 py-2 text-sm font-semibold rounded-t-lg border-b-2 border-transparent text-slate-500 hover:text-slate-700;
+        }
+        .tab-btn.active {
+            @apply text-blue-700 border-blue-700 bg-blue-50;
+        }
+        .sub-tab-btn {
+            @apply px-3 py-1.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100;
+        }
+        .sub-tab-btn.active {
+            @apply bg-blue-100 text-blue-800;
+        }
+        .seg {
+            display: flex;
+            border: 1px solid #e6e6e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .seg-btn {
+            flex: 1;
+            font-size: 14px;
+            border: 0;
+            border-left: 1px solid #e6e6e0;
+            padding: 7px 6px;
+            cursor: pointer;
+            background: #fff;
+            color: #334155;
+            white-space: nowrap;
+        }
+        .seg-btn:first-child {
+            border-left: 0;
+        }
+        .seg-btn.active {
+            background: #dbeafe;
+            color: #1e40af;
+            font-weight: 600;
+        }
+        .seg-btn:hover:not(.active) {
+            background: #f8fafc;
+        }
+        .ctrl-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .ctrl-label {
+            flex: 0 0 auto;
+            color: #475569;
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .ctrl-body {
+            flex: 1 1 auto;
+        }
+        .numbox {
+            flex: 0 0 62px;
+            text-align: right;
+            font-size: 15px;
+            padding: 4px 7px;
+            border: 1px solid #e6e6e0;
+            border-radius: 7px;
+            background: #fff;
+            color: #185fa5;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-slate-50 to-blue-50 text-slate-800 pb-10">
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        <!-- Header -->
+        <header class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-slate-900 mb-2">Generalization & Learning Curves</h1>
+            <p class="text-slate-600">Week 3 — Bias–Variance Decomposition และ Learning Curves ตาม playground ของอาจารย์</p>
+        </header>
+
+        <!-- Main Tabs -->
+        <div class="flex justify-center gap-2 mb-6">
+            <button id="main-tab-gen" class="tab-btn active" onclick="setMainTab('gen')">Generalization Playground</button>
+            <button id="main-tab-lc" class="tab-btn" onclick="setMainTab('lc')">Learning Curve Playground</button>
+        </div>
+
+        <!-- ===================== Generalization Playground ===================== -->
+        <section id="gen-section">
+            <div class="glass rounded-2xl shadow-xl p-6 mb-6 border border-white/50">
+                <div class="flex flex-wrap gap-2 mb-4 border-b border-slate-200 pb-3">
+                    <button class="sub-tab-btn active" data-gen="eio" onclick="setGenTab('eio')">$E_{in}$ vs $E_{out}$</button>
+                    <button class="sub-tab-btn" data-gen="avg" onclick="setGenTab('avg')">Average Fit</button>
+                    <button class="sub-tab-btn" data-gen="bias" onclick="setGenTab('bias')">Bias$^2$</button>
+                    <button class="sub-tab-btn" data-gen="var" onclick="setGenTab('var')">Variance</button>
+                    <button class="sub-tab-btn" data-gen="cmp" onclick="setGenTab('cmp')">Compare Models</button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Controls -->
+                    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 lg:col-span-1">
+                        <h3 class="font-semibold mb-4 text-slate-800">ตั้งค่า</h3>
+
+                        <div class="ctrl-row" id="c-gen-target">
+                            <span class="ctrl-label">$\text{target function}$</span>
+                            <div class="ctrl-body seg" data-seg="gen-target">
+                                <button type="button" class="seg-btn active" data-val="sin">$\sin(\pi x)$</button>
+                                <button type="button" class="seg-btn" data-val="x2">$x^2$</button>
+                            </div>
+                            <select id="gen-target" style="display:none"><option value="sin" selected>sin</option><option value="x2">x2</option></select>
+                        </div>
+
+                        <div class="ctrl-row" id="c-gen-model">
+                            <span class="ctrl-label">$\text{model}$</span>
+                            <div class="ctrl-body seg" data-seg="gen-model">
+                                <button type="button" class="seg-btn" data-val="0">$\text{constant}$</button>
+                                <button type="button" class="seg-btn active" data-val="1">$\text{linear}$</button>
+                                <button type="button" class="seg-btn" data-val="2">$\text{linear origin}$</button>
+                            </div>
+                            <select id="gen-model" style="display:none"><option value="0">0</option><option value="1" selected>1</option><option value="2">2</option></select>
+                        </div>
+
+                        <div class="ctrl-row" id="c-gen-n">
+                            <span class="ctrl-label">$n$</span>
+                            <input type="range" id="gen-n" min="2" max="20" value="2" class="ctrl-body accent-blue-600">
+                            <span class="numbox" id="gen-n-val">2</span>
+                        </div>
+
+                        <div class="ctrl-row" id="c-gen-sigma">
+                            <span class="ctrl-label">$\sigma$</span>
+                            <input type="range" id="gen-sigma" min="0" max="50" value="0" class="ctrl-body accent-blue-600">
+                            <span class="numbox" id="gen-sigma-val">0.00</span>
+                        </div>
+
+                        <div id="gen-ensemble-controls" class="hidden space-y-2">
+                            <button id="gen-add" class="w-full bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold py-2 px-4 rounded-lg transition">Add Dataset</button>
+                            <button id="gen-play" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-lg transition">Play</button>
+                            <button id="gen-reset" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2 px-4 rounded-lg transition">Reset</button>
+                        </div>
+
+                        <button id="gen-resample" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition">Resample</button>
+
+                        <div id="gen-info" class="mt-4 p-3 bg-slate-50 rounded-lg text-sm text-slate-700"></div>
+                    </div>
+
+                    <!-- Plots -->
+                    <div class="lg:col-span-3">
+                        <div id="gen-view-pair" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                                <div id="gen-plot-a" class="plot-box"></div>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                                <div id="gen-plot-b" class="plot-box"></div>
+                            </div>
+                        </div>
+                        <div id="gen-view-grid" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200"><div id="gen-cmp-0" class="plot-box" style="min-height:240px"></div></div>
+                            <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200"><div id="gen-cmp-1" class="plot-box" style="min-height:240px"></div></div>
+                            <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200"><div id="gen-cmp-2" class="plot-box" style="min-height:240px"></div></div>
+                        </div>
+                        <div id="gen-cmp-table" class="hidden mt-4 overflow-x-auto bg-white rounded-xl shadow-sm border border-slate-200">
+                            <table class="w-full text-sm text-left">
+                                <thead class="bg-slate-100 text-slate-700 uppercase">
+                                    <tr><th class="px-4 py-3">Model</th><th class="px-4 py-3 text-right">bias$^2$</th><th class="px-4 py-3 text-right">variance</th><th class="px-4 py-3 text-right">$E_{in}$</th><th class="px-4 py-3 text-right">$E_{out}$</th></tr>
+                                </thead>
+                                <tbody id="gen-cmp-body" class="divide-y divide-slate-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Learning Curve Playground ===================== -->
+        <section id="lc-section" class="hidden">
+            <div class="glass rounded-2xl shadow-xl p-6 mb-6 border border-white/50">
+                <div class="flex flex-wrap gap-2 mb-4 border-b border-slate-200 pb-3">
+                    <button class="sub-tab-btn active" data-lc="theory" onclick="setLcTab('theory')">Theory</button>
+                    <button class="sub-tab-btn" data-lc="practice" onclick="setLcTab('practice')">Practice</button>
+                    <button class="sub-tab-btn" data-lc="compare" onclick="setLcTab('compare')">Simple vs Complex</button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Controls -->
+                    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 lg:col-span-1">
+                        <h3 class="font-semibold mb-4 text-slate-800">ตั้งค่า</h3>
+
+                        <div class="ctrl-row" id="c-lc-target">
+                            <span class="ctrl-label">$\text{target function}$</span>
+                            <div class="ctrl-body seg" data-seg="lc-target">
+                                <button type="button" class="seg-btn active" data-val="sin">$\sin(\pi x)$</button>
+                                <button type="button" class="seg-btn" data-val="x2">$x^2$</button>
+                            </div>
+                            <select id="lc-target" style="display:none"><option value="sin" selected>sin</option><option value="x2">x2</option></select>
+                        </div>
+
+                        <div class="ctrl-row" id="c-lc-model">
+                            <span class="ctrl-label">$\text{model}$</span>
+                            <div class="ctrl-body seg" data-seg="lc-model">
+                                <button type="button" class="seg-btn" data-val="0">$\text{constant}$</button>
+                                <button type="button" class="seg-btn active" data-val="1">$\text{linear}$</button>
+                                <button type="button" class="seg-btn" data-val="2">$\text{linear origin}$</button>
+                            </div>
+                            <select id="lc-model" style="display:none"><option value="0">0</option><option value="1" selected>1</option><option value="2">2</option></select>
+                        </div>
+
+                        <div class="hidden" id="lc-compare-controls">
+                            <div class="ctrl-row" id="c-lc-mA">
+                                <span class="ctrl-label" style="color:#5B8FB9">$\text{model A}$</span>
+                                <div class="ctrl-body seg" data-seg="lc-mA">
+                                    <button type="button" class="seg-btn" data-val="0">$\text{constant}$</button>
+                                    <button type="button" class="seg-btn active" data-val="1">$\text{linear}$</button>
+                                    <button type="button" class="seg-btn" data-val="2">$\text{linear origin}$</button>
+                                </div>
+                                <select id="lc-mA" style="display:none"><option value="0">0</option><option value="1" selected>1</option><option value="2">2</option></select>
+                            </div>
+                            <div class="ctrl-row" id="c-lc-mB">
+                                <span class="ctrl-label" style="color:#B07AAE">$\text{model B}$</span>
+                                <div class="ctrl-body seg" data-seg="lc-mB">
+                                    <button type="button" class="seg-btn" data-val="0">$\text{constant}$</button>
+                                    <button type="button" class="seg-btn" data-val="1">$\text{linear}$</button>
+                                    <button type="button" class="seg-btn active" data-val="2">$\text{linear origin}$</button>
+                                </div>
+                                <select id="lc-mB" style="display:none"><option value="0">0</option><option value="1">1</option><option value="2" selected>2</option></select>
+                            </div>
+                        </div>
+
+                        <div class="ctrl-row" id="c-lc-n">
+                            <span class="ctrl-label">$n$</span>
+                            <input type="range" id="lc-n" min="2" max="60" value="8" class="ctrl-body accent-blue-600">
+                            <span class="numbox" id="lc-n-val">8</span>
+                        </div>
+
+                        <div class="ctrl-row" id="c-lc-sigma">
+                            <span class="ctrl-label">$\sigma$</span>
+                            <input type="range" id="lc-sigma" min="0" max="50" value="0" class="ctrl-body accent-blue-600">
+                            <span class="numbox" id="lc-sigma-val">0.00</span>
+                        </div>
+
+                        <div id="lc-run-controls" class="hidden space-y-2">
+                            <button id="lc-play" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-lg transition">Play</button>
+                            <button id="lc-reset" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2 px-4 rounded-lg transition">Reset</button>
+                        </div>
+                    </div>
+
+                    <!-- Plots -->
+                    <div class="lg:col-span-3">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                                <div id="lc-plot-data" class="plot-box"></div>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                                <div id="lc-plot-curve" class="plot-box"></div>
+                            </div>
+                        </div>
+                        <div id="lc-info" class="p-3 bg-slate-50 rounded-lg text-sm text-slate-700 text-center"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center text-slate-500 text-sm py-4">
+            CDTI — Machine Learning — Week 3 Assignment
+        </footer>
+    </div>
+
+    <script>
+        // ===================== Utilities =====================
+        function rng(seed) {
+            let s = (seed >>> 0) || 1;
+            const next = () => {
+                s = (s + 0x6D2B79F5) | 0;
+                let t = Math.imul(s ^ (s >>> 15), 1 | s);
+                t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+                return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+            };
+            const gauss = () => (next() + next() + next() + next() - 2) / 2;
+            return { next, gauss };
+        }
+
+        const TARGETS = {
+            sin: x => Math.sin(Math.PI * x),
+            x2: x => x * x,
+        };
+        const MODEL_NAMES = ['constant', 'linear', 'linear through origin'];
+        const MIN_POINTS = [1, 2, 1];  // constant, linear, linear-through-origin
+        const COLORS = {
+            target: '#6BA38C',
+            fit: '#5B8FB9',
+            data: '#E07A5F',
+            ein: '#5B8FB9',
+            eout: '#E07A5F',
+            simple: '#5B8FB9',
+            complex: '#B07AAE',
+            bias: '#E07A5F',
+            var: '#5B8FB9',
+            avg: '#5B8FB9',
+        };
+
+        const KATEX_OPTS = {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+            ],
+            throwOnError: false,
+        };
+
+        function renderMath(el) {
+            if (window.renderMathInElement) {
+                try { renderMathInElement(el, KATEX_OPTS); } catch (e) {}
+            }
+        }
+
+        function fitConstant(points) {
+            const b = points.reduce((a, p) => a + p.y, 0) / points.length;
+            return { weights: [b], predict: () => b };
+        }
+
+        function fitLinear(points) {
+            const n = points.length;
+            let s1 = 0, sx = 0, sy = 0, sxx = 0, sxy = 0;
+            for (const p of points) {
+                s1 += 1;
+                sx += p.x;
+                sy += p.y;
+                sxx += p.x * p.x;
+                sxy += p.x * p.y;
+            }
+            const det = s1 * sxx - sx * sx;
+            if (Math.abs(det) < 1e-12) {
+                const b = sy / s1;
+                return { weights: [b, 0], predict: () => b };
+            }
+            const w0 = (sy * sxx - sx * sxy) / det;
+            const w1 = (s1 * sxy - sx * sy) / det;
+            return { weights: [w0, w1], predict: x => w0 + w1 * x };
+        }
+
+        function fitLinearOrigin(points) {
+            let sxx = 0, sxy = 0;
+            for (const p of points) {
+                sxx += p.x * p.x;
+                sxy += p.x * p.y;
+            }
+            if (Math.abs(sxx) < 1e-12) {
+                return { weights: [0], predict: () => 0 };
+            }
+            const w = sxy / sxx;
+            return { weights: [w], predict: x => w * x };
+        }
+
+        function fitModel(points, modelIdx) {
+            if (modelIdx === 0) return fitConstant(points);
+            if (modelIdx === 1) return fitLinear(points);
+            return fitLinearOrigin(points);
+        }
+
+        function setupSeg(groupName, onChange) {
+            const sel = document.getElementById(groupName);
+            const buttons = document.querySelectorAll(`[data-seg="${groupName}"] .seg-btn`);
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    buttons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    sel.value = btn.dataset.val;
+                    sel.dispatchEvent(new Event('change'));
+                    if (onChange) onChange(btn.dataset.val);
+                });
+            });
+        }
+
+        function solve(A, b) {
+            const n = A.length;
+            for (let i = 0; i < n; i++) {
+                let max = i;
+                for (let k = i + 1; k < n; k++) if (Math.abs(A[k][i]) > Math.abs(A[max][i])) max = k;
+                [A[i], A[max]] = [A[max], A[i]];
+                [b[i], b[max]] = [b[max], b[i]];
+                for (let k = i + 1; k < n; k++) {
+                    const f = A[k][i] / A[i][i];
+                    for (let j = i; j < n; j++) A[k][j] -= f * A[i][j];
+                    b[k] -= f * b[i];
+                }
+            }
+            const x = Array(n).fill(0);
+            for (let i = n - 1; i >= 0; i--) {
+                let s = b[i];
+                for (let j = i + 1; j < n; j++) s -= A[i][j] * x[j];
+                x[i] = s / A[i][i];
+            }
+            return x;
+        }
+
+        function sampleDS(f, n, sigma, seed) {
+            const r = rng(seed || Math.floor(Math.random() * 1e9));
+            const pts = [];
+            for (let i = 0; i < n; i++) {
+                const x = -1 + 2 * r.next();
+                pts.push({ x, y: f(x) + (sigma > 0 ? r.gauss() * sigma * Math.sqrt(12) : 0) });
+            }
+            pts.sort((a, b) => a.x - b.x);
+            return pts;
+        }
+
+        function mse(yTrue, yPred) {
+            let s = 0;
+            for (let i = 0; i < yTrue.length; i++) s += (yTrue[i] - yPred[i]) ** 2;
+            return s / yTrue.length;
+        }
+
+        function computeEout(f, predict, nPoints = 500) {
+            const xs = linspace(-1, 1, nPoints);
+            let s = 0;
+            for (const x of xs) s += (predict(x) - f(x)) ** 2;
+            return s / xs.length;
+        }
+
+        function linspace(a, b, n) {
+            const out = [];
+            for (let i = 0; i < n; i++) out.push(a + (b - a) * i / (n - 1));
+            return out;
+        }
+
+        function range(a, b, step) {
+            const out = [];
+            for (let v = a; v <= b + 1e-9; v += step) out.push(v);
+            return out;
+        }
+
+        // ===================== UI State =====================
+        let mainTab = 'gen';
+        let genTab = 'eio';
+        let lcTab = 'theory';
+
+        function setMainTab(tab) {
+            mainTab = tab;
+            document.getElementById('main-tab-gen').classList.toggle('active', tab === 'gen');
+            document.getElementById('main-tab-lc').classList.toggle('active', tab === 'lc');
+            document.getElementById('gen-section').classList.toggle('hidden', tab !== 'gen');
+            document.getElementById('lc-section').classList.toggle('hidden', tab !== 'lc');
+            if (tab === 'gen') renderGen();
+            else renderLc();
+        }
+
+        function setGenTab(tab) {
+            genTab = tab;
+            document.querySelectorAll('[data-gen]').forEach(b => b.classList.toggle('active', b.dataset.gen === tab));
+            document.getElementById('gen-view-pair').classList.toggle('hidden', tab === 'cmp');
+            document.getElementById('gen-view-grid').classList.toggle('hidden', tab !== 'cmp');
+            document.getElementById('gen-cmp-table').classList.toggle('hidden', tab !== 'cmp');
+            document.getElementById('c-gen-model').classList.toggle('hidden', tab === 'cmp');
+            document.getElementById('gen-ensemble-controls').classList.toggle('hidden', tab === 'eio' || tab === 'cmp');
+            document.getElementById('gen-resample').classList.toggle('hidden', tab !== 'eio' && tab !== 'cmp');
+            if (tab !== 'avg' && tab !== 'bias' && tab !== 'var') resetGenAccum();
+            autoGenSimulate();
+            renderGen();
+        }
+
+        function setLcTab(tab) {
+            lcTab = tab;
+            document.querySelectorAll('[data-lc]').forEach(b => b.classList.toggle('active', b.dataset.lc === tab));
+            document.getElementById('c-lc-model').classList.toggle('hidden', tab === 'compare');
+            document.getElementById('lc-compare-controls').classList.toggle('hidden', tab !== 'compare');
+            document.getElementById('lc-run-controls').classList.toggle('hidden', tab !== 'practice');
+            resetLcAccum();
+            autoLcSimulate();
+            renderLc();
+        }
+
+        function autoGenSimulate() {
+            if (genTab === 'avg' || genTab === 'bias' || genTab === 'var') {
+                if (genAccum.count < 50) {
+                    addGenDatasets(50 - genAccum.count);
+                }
+            }
+        }
+
+        function autoLcSimulate() {
+            if (lcTab !== 'practice') return;
+            const f = TARGETS[document.getElementById('lc-target').value];
+            const M = +document.getElementById('lc-model').value;
+            const sigma = +document.getElementById('lc-sigma').value / 100;
+            const targetCount = 15;
+            while (lcAccum.count < targetCount) {
+                const batch = Math.min(targetCount - lcAccum.count, Math.max(1, Math.floor(lcAccum.count / 5) + 1));
+                for (let j = 0; j < LC_N.length; j++) {
+                    const nn = LC_N[j];
+                    if (nn < MIN_POINTS[M]) continue;
+                    const s = lcAccum.sum[j], s2 = lcAccum.sum2[j];
+                    let eSum = 0;
+                    for (let t = 0; t < batch; t++) {
+                        const pts = sampleDS(f, nn, sigma, lcSeed * 1000000 + nn * 7919 + (lcAccum.count + t) * 101 + 555);
+                        const m = fitModel(pts, M);
+                        const pred = pts.map(p => m.predict(p.x));
+                        eSum += mse(pts.map(p => p.y), pred);
+                        const xs = linspace(-1, 1, 100);
+                        for (let i = 0; i < 100; i++) {
+                            const yp = m.predict(xs[i]);
+                            if (!s[i]) { s[i] = 0; s2[i] = 0; }
+                            s[i] += yp; s2[i] += yp * yp;
+                        }
+                    }
+                    lcAccum.sumEin[j] += eSum;
+                }
+                lcAccum.count += batch;
+            }
+        }
+
+        // ===================== Plot Helpers =====================
+        const BASE_LAYOUT = {
+            margin: { t: 30, b: 40, l: 50, r: 20 },
+            paper_bgcolor: '#fff',
+            plot_bgcolor: '#fff',
+            xaxis: { title: 'x', range: [-1, 1], gridcolor: '#eef1f5', zerolinecolor: '#eef1f5' },
+            yaxis: { title: 'y', range: [-2, 2], gridcolor: '#eef1f5', zerolinecolor: '#eef1f5' },
+            showlegend: false,
+        };
+
+        const LC_LAYOUT = {
+            margin: { t: 30, b: 40, l: 50, r: 20 },
+            paper_bgcolor: '#fff',
+            plot_bgcolor: '#fff',
+            xaxis: { title: 'n (number of samples)', type: 'log', gridcolor: '#eef1f5' },
+            yaxis: { title: 'Expected Error', gridcolor: '#eef1f5' },
+            showlegend: true,
+            legend: { x: 1, y: 1 },
+        };
+
+        function curveTrace(fn, xs, opts) {
+            return {
+                x: xs, y: xs.map(fn),
+                mode: 'lines',
+                line: { color: opts.color || '#333', width: opts.width || 2, dash: opts.dash || 'solid' },
+                name: opts.name || '',
+            };
+        }
+
+        function pointsTrace(pts, opts) {
+            return {
+                x: pts.map(p => p.x), y: pts.map(p => p.y),
+                mode: 'markers',
+                marker: { color: opts.color || COLORS.data, size: opts.size || 8 },
+                name: opts.name || 'data',
+            };
+        }
+
+        function bandTrace(xs, lower, upper, color) {
+            return {
+                x: xs.concat(xs.slice().reverse()),
+                y: upper.concat(lower.slice().reverse()),
+                fill: 'toself',
+                fillcolor: color,
+                line: { color: 'transparent' },
+                name: '±1 std',
+                hoverinfo: 'skip',
+            };
+        }
+
+        function plot(id, traces, layout) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            Plotly.newPlot(id, traces, { ...BASE_LAYOUT, ...layout }, { responsive: true });
+        }
+
+        // ===================== Generalization Playground =====================
+        let genAccum = { count: 0, sum: [], sum2: [], recent: [] };
+        const GRID_X = linspace(-1, 1, 100);
+        let genSeed = 1;
+
+        function resetGenAccum() {
+            genAccum = { count: 0, sum: new Array(GRID_X.length).fill(0), sum2: new Array(GRID_X.length).fill(0), recent: [] };
+        }
+
+        function addGenDatasets(k) {
+            const f = TARGETS[document.getElementById('gen-target').value];
+            const M = +document.getElementById('gen-model').value;
+            const n = +document.getElementById('gen-n').value;
+            const sigma = +document.getElementById('gen-sigma').value / 100;
+
+            for (let j = 0; j < k; j++) {
+                const pts = sampleDS(f, n, sigma, genSeed * 100000 + genAccum.count);
+                if (pts.length < MIN_POINTS[M]) continue;
+                const m = fitModel(pts, M);
+                for (let i = 0; i < GRID_X.length; i++) {
+                    const yp = m.predict(GRID_X[i]);
+                    genAccum.sum[i] += yp;
+                    genAccum.sum2[i] += yp * yp;
+                }
+                genAccum.recent.push(m.predict);
+                genAccum.count++;
+            }
+            if (genAccum.recent.length > 40) genAccum.recent = genAccum.recent.slice(-40);
+        }
+
+        function genAccumStats(f) {
+            const mean = [], std = [], bias2 = [], varPt = [];
+            for (let i = 0; i < GRID_X.length; i++) {
+                const mu = genAccum.count ? genAccum.sum[i] / genAccum.count : 0;
+                const vv = genAccum.count ? Math.max(0, genAccum.sum2[i] / genAccum.count - mu * mu) : 0;
+                mean.push(mu);
+                std.push(Math.sqrt(vv));
+                bias2.push((mu - f(GRID_X[i])) ** 2);
+                varPt.push(vv);
+            }
+            const avgBias2 = bias2.reduce((a, b) => a + b, 0) / GRID_X.length;
+            const avgVar = varPt.reduce((a, b) => a + b, 0) / GRID_X.length;
+            return { mean, std, bias2, varPt, avgBias2, avgVar };
+        }
+
+        function renderGenEio() {
+            const f = TARGETS[document.getElementById('gen-target').value];
+            const M = +document.getElementById('gen-model').value;
+            const n = +document.getElementById('gen-n').value;
+            const sigma = +document.getElementById('gen-sigma').value / 100;
+            const pts = sampleDS(f, n, sigma, genSeed);
+            const m = fitModel(pts, M);
+
+            const xs = linspace(-1, 1, 200);
+            const trainPred = pts.map(p => m.predict(p.x));
+            const ein = mse(pts.map(p => p.y), trainPred);
+            const eout = computeEout(f, m.predict, 500);
+
+            // Left: in-sample
+            const leftTraces = [
+                curveTrace(f, xs, { color: COLORS.target, width: 2.5, name: 'target' }),
+                curveTrace(m.predict, xs, { color: COLORS.fit, width: 3, name: 'g(x)' }),
+                pointsTrace(pts, { color: COLORS.data, size: 10, name: 'data' }),
+            ];
+            // error squares as vertical lines for simplicity
+            for (const p of pts) {
+                leftTraces.push({
+                    x: [p.x, p.x], y: [p.y, m.predict(p.x)],
+                    mode: 'lines', line: { color: 'rgba(176,122,174,0.5)', width: 2 },
+                    showlegend: false, hoverinfo: 'skip',
+                });
+            }
+            plot('gen-plot-a', leftTraces, { title: 'In-sample: fit on n points' });
+
+            // Right: out-of-sample
+            const upper = xs.map(x => Math.max(m.predict(x), f(x)));
+            const lower = xs.map(x => Math.min(m.predict(x), f(x)));
+            const rightTraces = [
+                bandTrace(xs, lower, upper, 'rgba(224,122,95,0.28)'),
+                curveTrace(f, xs, { color: COLORS.target, width: 2.5, name: 'target' }),
+                curveTrace(m.predict, xs, { color: COLORS.fit, width: 3, name: 'g(x)' }),
+            ];
+            plot('gen-plot-b', rightTraces, { title: 'Out-of-sample: fit vs true target' });
+
+            document.getElementById('gen-info').innerHTML =
+                `$E_{\\text{in}} = ${ein.toFixed(3)}$ &nbsp;|&nbsp; $E_{\\text{out}} = ${eout.toFixed(3)}$`;
+            renderMath(document.getElementById('gen-info'));
+        }
+
+        function renderGenAvg() {
+            const f = TARGETS[document.getElementById('gen-target').value];
+            const M = +document.getElementById('gen-model').value;
+            const n = +document.getElementById('gen-n').value;
+            const sigma = +document.getElementById('gen-sigma').value / 100;
+
+            if (genAccum.count === 0) addGenDatasets(1);
+            const st = genAccumStats(f);
+
+            const xs = linspace(-1, 1, 200);
+            // Left: one dataset + fit
+            const pts = sampleDS(f, n, sigma, genSeed);
+            const m = fitModel(pts, M);
+            const leftTraces = [
+                curveTrace(f, xs, { color: COLORS.target, width: 2.5 }),
+                curveTrace(m.predict, xs, { color: COLORS.fit, width: 3 }),
+                pointsTrace(pts, { color: COLORS.data, size: 10 }),
+            ];
+            plot('gen-plot-a', leftTraces, { title: 'One dataset + its fit' });
+
+            // Right: accumulated average + sample fits
+            const rightTraces = [];
+            for (const fn of genAccum.recent) {
+                rightTraces.push(curveTrace(fn, xs, { color: 'rgba(108,116,130,0.18)', width: 1 }));
+            }
+            rightTraces.push(curveTrace(f, xs, { color: COLORS.target, width: 2.5, name: 'target' }));
+            rightTraces.push(curveTrace(x => interp(x, GRID_X, st.mean), xs, { color: COLORS.avg, width: 3, name: 'ḡ(x)' }));
+            plot('gen-plot-b', rightTraces, { title: `Average fit over d=${genAccum.count} datasets` });
+
+            document.getElementById('gen-info').innerHTML =
+                `datasets $d = ${genAccum.count}$ &nbsp;|&nbsp; $\\text{bias}^2 \\approx ${st.avgBias2.toFixed(3)}$ &nbsp;|&nbsp; $\\text{variance} \\approx ${st.avgVar.toFixed(3)}$`;
+            renderMath(document.getElementById('gen-info'));
+        }
+
+        function renderGenBias() {
+            const f = TARGETS[document.getElementById('gen-target').value];
+            const M = +document.getElementById('gen-model').value;
+            const n = +document.getElementById('gen-n').value;
+            const sigma = +document.getElementById('gen-sigma').value / 100;
+
+            if (genAccum.count < 50) addGenDatasets(50 - genAccum.count);
+            const st = genAccumStats(f);
+
+            const xs = linspace(-1, 1, 200);
+            // Left: fits + average vs target
+            const leftTraces = [];
+            for (const fn of genAccum.recent) {
+                leftTraces.push(curveTrace(fn, xs, { color: 'rgba(108,116,130,0.18)', width: 1 }));
+            }
+            leftTraces.push(curveTrace(f, xs, { color: COLORS.target, width: 2.5 }));
+            leftTraces.push(curveTrace(x => interp(x, GRID_X, st.mean), xs, { color: COLORS.avg, width: 3 }));
+            plot('gen-plot-a', leftTraces, { title: 'Fits + ḡ(x) vs target' });
+
+            // Right: bias²(x)
+            const rightTraces = [
+                curveTrace(x => interp(x, GRID_X, st.bias2), xs, { color: COLORS.bias, width: 2.5 }),
+            ];
+            plot('gen-plot-b', rightTraces, { title: `bias²(x) — average = ${st.avgBias2.toFixed(3)}`, yaxis: { range: [0, Math.max(0.1, ...st.bias2) * 1.2] } });
+
+            document.getElementById('gen-info').innerHTML =
+                `$\\text{bias}^2 = ${st.avgBias2.toFixed(4)}$ (avg over $x$)`;
+            renderMath(document.getElementById('gen-info'));
+        }
+
+        function renderGenVar() {
+            const f = TARGETS[document.getElementById('gen-target').value];
+            const M = +document.getElementById('gen-model').value;
+            const n = +document.getElementById('gen-n').value;
+            const sigma = +document.getElementById('gen-sigma').value / 100;
+
+            if (genAccum.count < 50) addGenDatasets(50 - genAccum.count);
+            const st = genAccumStats(f);
+
+            const xs = linspace(-1, 1, 200);
+            // Left: spread around average
+            const leftTraces = [];
+            for (const fn of genAccum.recent) {
+                leftTraces.push(curveTrace(fn, xs, { color: 'rgba(108,116,130,0.18)', width: 1 }));
+            }
+            leftTraces.push(curveTrace(x => interp(x, GRID_X, st.mean), xs, { color: COLORS.avg, width: 3 }));
+            plot('gen-plot-a', leftTraces, { title: 'Spread of fits around ḡ(x)' });
+
+            // Right: var(x)
+            const rightTraces = [
+                curveTrace(x => interp(x, GRID_X, st.varPt), xs, { color: COLORS.var, width: 2.5 }),
+            ];
+            plot('gen-plot-b', rightTraces, { title: `var(x) — average = ${st.avgVar.toFixed(3)}`, yaxis: { range: [0, Math.max(0.1, ...st.varPt) * 1.2] } });
+
+            document.getElementById('gen-info').innerHTML =
+                `$\\text{variance} = ${st.avgVar.toFixed(4)}$ (avg over $x$)`;
+            renderMath(document.getElementById('gen-info'));
+        }
+
+        function renderGenCmp() {
+            const f = TARGETS[document.getElementById('gen-target').value];
+            const n = +document.getElementById('gen-n').value;
+            const sigma = +document.getElementById('gen-sigma').value / 100;
+            const xs = linspace(-1, 1, 150);
+
+            const rows = [];
+            for (let M = 0; M < 3; M++) {
+                const s = new Array(xs.length).fill(0), s2 = new Array(xs.length).fill(0);
+                let sumEin = 0;
+                const fits = [];
+                const D = 3000;
+                for (let d = 0; d < D; d++) {
+                    const pts = sampleDS(f, n, sigma, 600000 + M * 100000 + d);
+                    const m = fitModel(pts, M);
+                    const pred = pts.map(p => m.predict(p.x));
+                    sumEin += mse(pts.map(p => p.y), pred);
+                    for (let i = 0; i < xs.length; i++) {
+                        const yp = m.predict(xs[i]);
+                        s[i] += yp; s2[i] += yp * yp;
+                    }
+                    if (d < 20) fits.push(m.predict);
+                }
+                const mean = s.map(v => v / D);
+                let b = 0, v = 0;
+                for (let i = 0; i < xs.length; i++) {
+                    const mu = mean[i], vv = Math.max(0, s2[i] / D - mu * mu);
+                    b += (mu - f(xs[i])) ** 2;
+                    v += vv;
+                }
+                b /= xs.length; v /= xs.length;
+                const eout = b + v + sigma * sigma;
+                rows.push({ M, name: MODEL_NAMES[M], bias2: b, var: v, ein: sumEin / D, eout });
+
+                // plot
+                const traces = [];
+                for (const fn of fits) traces.push(curveTrace(fn, xs, { color: 'rgba(108,116,130,0.25)', width: 1 }));
+                traces.push(curveTrace(f, xs, { color: COLORS.target, width: 2 }));
+                traces.push(curveTrace(x => mean[Math.round((x + 1) / 2 * (xs.length - 1))] || 0, xs, { color: COLORS.avg, width: 2.5 }));
+                plot(`gen-cmp-${M}`, traces, { title: MODEL_NAMES[M], yaxis: { range: [-2, 2] } });
+            }
+
+            const best = Math.min(...rows.map(r => r.eout));
+            const tbody = document.getElementById('gen-cmp-body');
+            tbody.innerHTML = rows.map(r => {
+                const hl = Math.abs(r.eout - best) < 1e-9;
+                return `<tr class="${hl ? 'bg-emerald-50 font-semibold' : ''}">
+                    <td class="px-4 py-2">${r.name}</td>
+                    <td class="px-4 py-2 text-right font-mono">${r.bias2.toFixed(3)}</td>
+                    <td class="px-4 py-2 text-right font-mono">${r.var.toFixed(3)}</td>
+                    <td class="px-4 py-2 text-right font-mono">${r.ein.toFixed(3)}</td>
+                    <td class="px-4 py-2 text-right font-mono ${hl ? 'text-emerald-700' : ''}">${r.eout.toFixed(3)}</td>
+                </tr>`;
+            }).join('');
+
+            document.getElementById('gen-info').textContent = `Lowest E_out highlighted — often not the most complex model.`;
+        }
+
+        function renderGen() {
+            if (mainTab !== 'gen') return;
+            switch (genTab) {
+                case 'eio': renderGenEio(); break;
+                case 'avg': renderGenAvg(); break;
+                case 'bias': renderGenBias(); break;
+                case 'var': renderGenVar(); break;
+                case 'cmp': renderGenCmp(); break;
+            }
+        }
+
+        // ===================== Learning Curve Playground =====================
+        const LC_N = [2, 3, 4, 5, 7, 10, 15, 20, 30, 50, 100];
+        let lcSeed = 1;
+        let lcAccum = { count: 0, sum: [], sum2: [], sumEin: [] };
+        let lcTimer = null;
+        let lcPlaying = false;
+
+        function resetLcAccum() {
+            lcAccum = { count: 0, sum: LC_N.map(() => []), sum2: LC_N.map(() => []), sumEin: LC_N.map(() => 0) };
+            lcPlaying = false;
+            if (lcTimer) { clearTimeout(lcTimer); lcTimer = null; }
+            document.getElementById('lc-play').textContent = 'Play';
+        }
+
+        function curveFor(M, T) {
+            const f = TARGETS[document.getElementById('lc-target').value];
+            const sigma = +document.getElementById('lc-sigma').value / 100;
+            const out = [];
+            for (const nn of LC_N) {
+                if (nn < MIN_POINTS[M]) { out.push({ N: nn, ein: null, eout: null, bias2: null }); continue; }
+                const s = [], s2 = [];
+                let sumEin = 0;
+                for (let t = 0; t < T; t++) {
+                    const pts = sampleDS(f, nn, sigma, lcSeed * 1000000 + nn * 7919 + t * 101);
+                    const m = fitModel(pts, M);
+                    const pred = pts.map(p => m.predict(p.x));
+                    sumEin += mse(pts.map(p => p.y), pred);
+                    const xs = linspace(-1, 1, 100);
+                    for (let i = 0; i < xs.length; i++) {
+                        const yp = m.predict(xs[i]);
+                        if (!s[i]) { s[i] = 0; s2[i] = 0; }
+                        s[i] += yp; s2[i] += yp * yp;
+                    }
+                }
+                let b = 0, v = 0;
+                const xs = linspace(-1, 1, 100);
+                for (let i = 0; i < xs.length; i++) {
+                    const mu = s[i] / T, vv = Math.max(0, s2[i] / T - mu * mu);
+                    b += (mu - f(xs[i])) ** 2;
+                    v += vv;
+                }
+                b /= xs.length; v /= xs.length;
+                out.push({ N: nn, ein: sumEin / T, eout: b + v + sigma * sigma, bias2: b });
+            }
+            return out;
+        }
+
+        function renderLcData(f, M, n, sigma) {
+            const xs = linspace(-1, 1, 200);
+            const traces = [curveTrace(f, xs, { color: COLORS.target, width: 2.5, name: 'target' })];
+
+            if (lcTab === 'compare') {
+                const MA = +document.getElementById('lc-mA').value;
+                const MB = +document.getElementById('lc-mB').value;
+                const pts = sampleDS(f, n, sigma, lcSeed * 1000000 + n * 7919 + 9);
+                const mA = fitModel(pts, MA);
+                const mB = fitModel(pts, MB);
+                traces.push(curveTrace(mA.predict, xs, { color: COLORS.simple, width: 2.5, name: 'model A' }));
+                traces.push(curveTrace(mB.predict, xs, { color: COLORS.complex, width: 2.5, name: 'model B' }));
+                traces.push(pointsTrace(pts, { color: COLORS.data, size: 9, name: 'data' }));
+            } else if (lcTab === 'theory') {
+                const K = 16, gs = new Array(100).fill(0);
+                for (let t = 0; t < K; t++) {
+                    const pts = sampleDS(f, n, sigma, lcSeed * 1000000 + n * 7919 + t + 9);
+                    const m = fitModel(pts, M);
+                    const xs2 = linspace(-1, 1, 100);
+                    for (let i = 0; i < 100; i++) gs[i] += m.predict(xs2[i]);
+                }
+                const meanFn = x => {
+                    const xs2 = linspace(-1, 1, 100);
+                    const idx = Math.round((x + 1) / 2 * 99);
+                    return gs[idx] / K;
+                };
+                traces.push(curveTrace(meanFn, xs, { color: COLORS.fit, width: 3, name: 'average fit' }));
+            } else {
+                const pts = sampleDS(f, n, sigma, lcSeed * 1000000 + n * 7919 + 9);
+                const m = fitModel(pts, M);
+                traces.push(curveTrace(m.predict, xs, { color: COLORS.fit, width: 2.5, name: 'g(x)' }));
+                traces.push(pointsTrace(pts, { color: COLORS.data, size: 9, name: 'data' }));
+            }
+            plot('lc-plot-data', traces, { title: 'Data + fit at current n' });
+        }
+
+        function renderLcCurve() {
+            const f = TARGETS[document.getElementById('lc-target').value];
+            const sigma = +document.getElementById('lc-sigma').value / 100;
+            const nsel = +document.getElementById('lc-n').value;
+
+            let refA, refB, M;
+            if (lcTab === 'compare') {
+                const MA = +document.getElementById('lc-mA').value;
+                const MB = +document.getElementById('lc-mB').value;
+                refA = curveFor(MA, 1500);
+                refB = curveFor(MB, 1500);
+                M = MA;
+            } else {
+                M = +document.getElementById('lc-model').value;
+                refA = curveFor(M, 1500);
+                refB = [];
+            }
+
+            // Determine ymax
+            let ymax = 1.2;
+            const allVals = [...refA, ...refB].flatMap(r => [r.ein, r.eout]).filter(v => v != null && isFinite(v));
+            if (allVals.length) ymax = Math.max(0.1, Math.max(...allVals) * 1.15);
+
+            const traces = [];
+            const layout = { ...LC_LAYOUT, yaxis: { title: 'Expected Error', range: [0, ymax] } };
+
+            // vertical line at selected n
+            traces.push({
+                x: [nsel, nsel], y: [0, ymax],
+                mode: 'lines', line: { color: '#9aa3b2', width: 1.3, dash: 'dash' },
+                name: 'current n', showlegend: false,
+            });
+
+            if (lcTab === 'compare') {
+                const MA = +document.getElementById('lc-mA').value;
+                const MB = +document.getElementById('lc-mB').value;
+                const nameA = MODEL_NAMES[MA], nameB = MODEL_NAMES[MB];
+                traces.push({
+                    x: refA.map(r => r.N), y: refA.map(r => r.eout),
+                    mode: 'lines', line: { color: COLORS.simple, width: 2.5 }, name: `Eout ${nameA}`,
+                });
+                traces.push({
+                    x: refB.map(r => r.N), y: refB.map(r => r.eout),
+                    mode: 'lines', line: { color: COLORS.complex, width: 2.5 }, name: `Eout ${nameB}`,
+                });
+                const aPt = refA.find(r => r.N === nsel) || refA[refA.length - 1];
+                const bPt = refB.find(r => r.N === nsel) || refB[refB.length - 1];
+
+                document.getElementById('lc-info').innerHTML =
+                    `$E_{\\text{out}}^{\\text{${nameA}}} = ${aPt.eout.toFixed(3)}$ &nbsp;|&nbsp; $E_{\\text{out}}^{\\text{${nameB}}} = ${bPt.eout.toFixed(3)}$`;
+            } else {
+                const nv = sigma * sigma;
+                const floor = nv + (refA[refA.length - 1].bias2 || 0);
+
+                // asymptote
+                if (floor < ymax) {
+                    traces.push({
+                        x: [LC_N[0], LC_N[LC_N.length - 1]], y: [floor, floor],
+                        mode: 'lines', line: { color: COLORS.target, width: 1.4, dash: 'dash' }, name: 'bias² + σ²', showlegend: true,
+                    });
+                }
+
+                // measured curve
+                let run = refA;
+                if (lcTab === 'practice' && lcAccum.count > 0) {
+                    run = LC_N.map((nn, j) => {
+                        if (nn < MIN_POINTS[M]) return { N: nn, ein: null, eout: null };
+                        const s = lcAccum.sum[j], s2 = lcAccum.sum2[j];
+                        let b = 0, v = 0;
+                        for (let i = 0; i < s.length; i++) {
+                            const mu = s[i] / lcAccum.count, vv = Math.max(0, s2[i] / lcAccum.count - mu * mu);
+                            const xs = linspace(-1, 1, 100);
+                            b += (mu - f(xs[i])) ** 2; v += vv;
+                        }
+                        b /= 100; v /= 100;
+                        return { N: nn, ein: lcAccum.sumEin[j] / lcAccum.count, eout: b + v + nv };
+                    });
+                }
+
+                traces.push({
+                    x: run.map(r => r.N), y: run.map(r => r.ein),
+                    mode: 'lines', line: { color: COLORS.ein, width: 2, dash: 'dash' }, name: 'Ein',
+                });
+                traces.push({
+                    x: run.map(r => r.N), y: run.map(r => r.eout),
+                    mode: 'lines', line: { color: COLORS.eout, width: 2 }, name: 'Eout',
+                });
+
+                const th = refA.find(r => r.N === nsel) || refA[refA.length - 1];
+                const pr = run.find(r => r.N === nsel) || run[run.length - 1];
+                const b = Math.max(0, th.bias2 || 0);
+                const vv = Math.max(0, (th.eout || 0) - b - nv);
+                document.getElementById('lc-info').innerHTML =
+                    `$E_{\\text{out}} = \\text{bias}^2 + \\text{variance} + \\sigma^2 = ${b.toFixed(3)} + ${vv.toFixed(3)} + ${nv.toFixed(3)} = ${(th.eout || 0).toFixed(3)}$` +
+                    (lcTab === 'practice' ? `<br>runs so far: ${lcAccum.count}` : '');
+            }
+
+            plot('lc-plot-curve', traces, layout);
+        }
+
+        function renderLc() {
+            if (mainTab !== 'lc') return;
+            const f = TARGETS[document.getElementById('lc-target').value];
+            const M = +document.getElementById('lc-model').value;
+            const n = +document.getElementById('lc-n').value;
+            const sigma = +document.getElementById('lc-sigma').value / 100;
+            renderLcData(f, M, n, sigma);
+            renderLcCurve();
+            renderMath(document.getElementById('lc-info'));
+        }
+
+        // ===================== Interpolation helper =====================
+        function interp(x, xs, ys) {
+            const t = (x - xs[0]) / (xs[xs.length - 1] - xs[0]) * (xs.length - 1);
+            let i = Math.floor(t);
+            if (i < 0) i = 0;
+            if (i >= xs.length - 1) i = xs.length - 2;
+            const u = t - i;
+            return ys[i] * (1 - u) + ys[i + 1] * u;
+        }
+
+        // ===================== Event Listeners =====================
+        document.getElementById('gen-n').addEventListener('input', e => {
+            document.getElementById('gen-n-val').textContent = e.target.value;
+            if (genTab === 'eio' || genTab === 'cmp') renderGen();
+        });
+        document.getElementById('gen-n').addEventListener('change', () => {
+            resetGenAccum();
+            renderGen();
+        });
+        document.getElementById('gen-sigma').addEventListener('input', e => {
+            document.getElementById('gen-sigma-val').textContent = (+e.target.value / 100).toFixed(2);
+            if (genTab === 'eio' || genTab === 'cmp') renderGen();
+        });
+        document.getElementById('gen-sigma').addEventListener('change', () => {
+            resetGenAccum();
+            autoGenSimulate();
+            renderGen();
+        });
+        document.getElementById('gen-target').addEventListener('change', () => { resetGenAccum(); genSeed++; autoGenSimulate(); renderGen(); });
+        document.getElementById('gen-model').addEventListener('change', () => { resetGenAccum(); autoGenSimulate(); renderGen(); });
+        document.getElementById('gen-resample').addEventListener('click', () => { genSeed++; renderGen(); });
+        document.getElementById('gen-add').addEventListener('click', () => { addGenDatasets(1); renderGen(); });
+        document.getElementById('gen-play').addEventListener('click', () => {
+            if (genPlaying) { stopGenPlay(); return; }
+            genPlaying = true;
+            document.getElementById('gen-play').textContent = 'Pause';
+            genPlayTick();
+        });
+        document.getElementById('gen-reset').addEventListener('click', () => { stopGenPlay(); resetGenAccum(); genSeed++; autoGenSimulate(); renderGen(); });
+
+        let genPlaying = false;
+        let genTimer = null;
+        function stopGenPlay() {
+            genPlaying = false;
+            if (genTimer) { clearTimeout(genTimer); genTimer = null; }
+            document.getElementById('gen-play').textContent = 'Play';
+        }
+        function genPlayTick() {
+            if (!genPlaying) return;
+            addGenDatasets(Math.min(50, Math.max(1, Math.floor(genAccum.count / 10) + 1)));
+            renderGen();
+            genTimer = setTimeout(genPlayTick, 60);
+        }
+
+        document.getElementById('lc-n').addEventListener('input', e => {
+            document.getElementById('lc-n-val').textContent = e.target.value;
+            renderLc();
+        });
+        document.getElementById('lc-sigma').addEventListener('input', e => {
+            document.getElementById('lc-sigma-val').textContent = (+e.target.value / 100).toFixed(2);
+            if (lcTab !== 'practice') renderLc();
+        });
+        document.getElementById('lc-sigma').addEventListener('change', () => { resetLcAccum(); autoLcSimulate(); renderLc(); });
+        document.getElementById('lc-target').addEventListener('change', () => { resetLcAccum(); lcSeed++; autoLcSimulate(); renderLc(); });
+        document.getElementById('lc-model').addEventListener('change', () => { resetLcAccum(); autoLcSimulate(); renderLc(); });
+        document.getElementById('lc-mA').addEventListener('change', () => { resetLcAccum(); autoLcSimulate(); renderLc(); });
+        document.getElementById('lc-mB').addEventListener('change', () => { resetLcAccum(); autoLcSimulate(); renderLc(); });
+        document.getElementById('lc-play').addEventListener('click', () => {
+            if (lcPlaying) { stopGenPlay(); return; }
+            lcPlaying = true;
+            document.getElementById('lc-play').textContent = 'Pause';
+            lcPlayTick();
+        });
+        document.getElementById('lc-reset').addEventListener('click', () => { stopLcPlay(); resetLcAccum(); lcSeed++; autoLcSimulate(); renderLc(); });
+
+        function stopLcPlay() {
+            lcPlaying = false;
+            if (lcTimer) { clearTimeout(lcTimer); lcTimer = null; }
+            document.getElementById('lc-play').textContent = 'Play';
+        }
+        function lcPlayTick() {
+            if (!lcPlaying) return;
+            const f = TARGETS[document.getElementById('lc-target').value];
+            const M = +document.getElementById('lc-model').value;
+            const sigma = +document.getElementById('lc-sigma').value / 100;
+            const batch = Math.max(1, Math.floor(lcAccum.count / 10) + 1);
+            for (let j = 0; j < LC_N.length; j++) {
+                const nn = LC_N[j];
+                if (nn < MIN_POINTS[M]) continue;
+                const s = lcAccum.sum[j], s2 = lcAccum.sum2[j];
+                let eSum = 0;
+                for (let t = 0; t < batch; t++) {
+                    const pts = sampleDS(f, nn, sigma, lcSeed * 1000000 + nn * 7919 + (lcAccum.count + t) * 101 + 555);
+                    const m = fitModel(pts, M);
+                    const pred = pts.map(p => m.predict(p.x));
+                    eSum += mse(pts.map(p => p.y), pred);
+                    const xs = linspace(-1, 1, 100);
+                    for (let i = 0; i < 100; i++) {
+                        const yp = m.predict(xs[i]);
+                        if (!s[i]) { s[i] = 0; s2[i] = 0; }
+                        s[i] += yp; s2[i] += yp * yp;
+                    }
+                }
+                lcAccum.sumEin[j] += eSum;
+            }
+            lcAccum.count += batch;
+            renderLc();
+            lcTimer = setTimeout(lcPlayTick, 80);
+        }
+
+        window.addEventListener('resize', () => {
+            if (mainTab === 'gen') renderGen();
+            else renderLc();
+        });
+
+        // ===================== Init =====================
+        window.addEventListener('load', () => {
+            setupSeg('gen-target');
+            setupSeg('gen-model');
+            setupSeg('lc-target');
+            setupSeg('lc-model');
+            setupSeg('lc-mA');
+            setupSeg('lc-mB');
+            resetGenAccum();
+            resetLcAccum();
+            renderGen();
+            try { renderMathInElement(document.body, KATEX_OPTS); } catch (e) {}
+        });
+    </script>
+</body>
+</html>
