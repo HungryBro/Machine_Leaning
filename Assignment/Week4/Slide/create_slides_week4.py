@@ -83,7 +83,7 @@ def add_footer(slide, page):
     add_rect(slide, 0.62, 6.98, 12.08, 0.012, rgb("DEE2E6"))
     add_text(slide, "Machine Learning — Week 4  |  Performance Estimation", 0.62, 7.08,
              8.5, 0.2, size=8, color=MUTED, margin=0)
-    add_text(slide, str(page), 12.12, 7.06, 0.58, 0.22, size=9, color=MUTED,
+    add_text(slide, f"{page:02d}", 12.12, 7.03, 0.58, 0.28, size=12, color=MUTED,
              bold=True, align=PP_ALIGN.RIGHT, margin=0)
 
 
@@ -145,6 +145,8 @@ def add_title_slide(prs):
              bold=True, margin=0)
     add_text(slide, "นายสุภมงคล ชอบรัมย์\nนายชินวัตร กิตต๊ะ\nนายกฤตชัย พรายศรี",
              8.45, 5.42, 4.15, 0.9, size=10, color=WHITE, margin=0)
+    add_text(slide, "01", 12.12, 7.03, 0.58, 0.28, size=12, color=WHITE,
+             bold=True, align=PP_ALIGN.RIGHT, margin=0)
     return slide
 
 
@@ -189,6 +191,58 @@ def add_methods_slide(prs):
     return slide
 
 
+def add_results_table_slide(prs):
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    add_header(slide, "ตัวเลขจากการทดลอง: เปรียบเทียบวิธีวัดผล", 4, "02  Numerical Results")
+    add_text(slide, "ผลจากข้อมูลชุดเดียวที่ n = 20 และ σ = 0.3 — ค่าทั้งหมดมาจากโค้ด Week4",
+             0.72, 1.25, 11.8, 0.3, size=13, color=MUTED, margin=0)
+
+    table = slide.shapes.add_table(3, 5, Inches(0.62), Inches(1.68), Inches(12.08), Inches(2.0)).table
+    col_widths = [2.55, 2.35, 2.55, 2.25, 2.38]
+    for idx, width in enumerate(col_widths):
+        table.columns[idx].width = Inches(width)
+
+    def style_cell(cell, text, fill, color, size=12, bold=False, align=PP_ALIGN.CENTER):
+        cell.text = text
+        cell.fill.solid()
+        cell.fill.fore_color.rgb = fill
+        cell.vertical_anchor = MSO_ANCHOR.MIDDLE
+        cell.margin_left = Inches(0.06)
+        cell.margin_right = Inches(0.06)
+        cell.margin_top = Inches(0.02)
+        cell.margin_bottom = Inches(0.02)
+        p = cell.text_frame.paragraphs[0]
+        p.alignment = align
+        for run in p.runs:
+            set_font(run, size, color, bold)
+
+    headers = ["โมเดล", "true Eout", "Resubstitution", "Holdout 70%", "5-Fold CV"]
+    for j, value in enumerate(headers):
+        style_cell(table.cell(0, j), value, GREEN, WHITE, 12, True,
+                   PP_ALIGN.LEFT if j == 0 else PP_ALIGN.CENTER)
+
+    rows = [
+        ["Constant", "0.6343", "0.4577", "0.7149", "0.5067"],
+        ["Linear", "0.3003", "0.3066", "0.5889", "0.3905"],
+    ]
+    for i, row in enumerate(rows, start=1):
+        fill = WHITE if i == 1 else LIGHT
+        for j, value in enumerate(row):
+            style_cell(table.cell(i, j), value, fill, INK, 13, False,
+                       PP_ALIGN.LEFT if j == 0 else PP_ALIGN.CENTER)
+
+    add_text(slide, "ข้อสังเกต", 0.62, 4.18, 3.2, 0.3, size=18, color=INK, bold=True, margin=0)
+    add_rect(slide, 0.62, 4.58, 0.06, 1.12, RED)
+    add_text(slide,
+             "Resubstitution มีแนวโน้มประเมิน error ต่ำกว่าค่า true Eout เพราะใช้ข้อมูลชุดฝึกเดิมในการทดสอบ\n"
+             "ส่วน Holdout แปรผันตามการแบ่งข้อมูล และ K-Fold ใช้ข้อมูลได้คุ้มกว่าด้วยการสลับ validation fold",
+             0.9, 4.59, 11.55, 0.88, size=16, color=INK, margin=0)
+    add_text(slide, "หมายเหตุ: ตารางนี้ไม่มีการคำนวณมือ — ใช้ค่าจาก single dataset ใน HW2.py โดยตรง",
+             0.62, 6.27, 12.0, 0.3, size=10, color=MUTED, margin=0)
+    add_footer(slide, 4)
+    return slide
+
+
 def add_plot_slide(prs, title, image_name, caption, page, kicker, note):
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     add_header(slide, title, page, kicker)
@@ -203,7 +257,7 @@ def add_plot_slide(prs, title, image_name, caption, page, kicker, note):
 
 def add_summary_slide(prs):
     slide = prs.slides.add_slide(prs.slide_layouts[6])
-    add_header(slide, "สรุป: เลือกวิธีวัดผลให้เหมาะกับข้อมูล", 7, "04  Conclusion")
+    add_header(slide, "สรุป: เลือกวิธีวัดผลให้เหมาะกับข้อมูล", 8, "04  Conclusion")
     add_card(slide, 0.72, 1.42, 3.72, 3.35, "01  Resub ต่ำเกินจริง",
              "การทดสอบบนชุดฝึก\nทำให้ error ดูดีเกินไป\n\n→ ใช้ดู fit เบื้องต้น\nแต่อย่าใช้แทน Eout",
              ORANGE, PALE_ORANGE, 15, 18)
@@ -218,7 +272,7 @@ def add_summary_slide(prs):
              size=11, color=TEAL, bold=True, margin=0)
     add_text(slide, "การวัดผลที่ดีต้องเลียนแบบข้อมูลใหม่ให้มากที่สุด และต้องพิจารณา bias กับ variance ไปพร้อมกัน",
              1.5, 5.91, 10.25, 0.38, size=17, color=WHITE, bold=True, margin=0)
-    add_footer(slide, 7)
+    add_footer(slide, 8)
     return slide
 
 
@@ -229,12 +283,13 @@ def build_deck():
     add_title_slide(prs)
     add_setup_slide(prs)
     add_methods_slide(prs)
+    add_results_table_slide(prs)
     add_plot_slide(
         prs,
         "Bias / Variance / MSE ของตัวประมาณ",
         "part2.png",
         "แกนตั้ง = estimate − true Eout  |  เส้นดำ = 0  |  สามเหลี่ยมสีเขียว = ค่าเฉลี่ย",
-        4,
+        5,
         "02  ผลการทดลอง",
         "Resubstitution มีแนวโน้มติดลบ เพราะประเมิน error ต่ำกว่าความจริง",
     )
@@ -243,7 +298,7 @@ def build_deck():
         "ผลของสัดส่วน Holdout และจำนวน fold",
         "part3.png",
         "ซ้าย: เปลี่ยนสัดส่วน train ของ Holdout  |  ขวา: เปลี่ยน k ของ K-Fold  |  ค่าที่ต่ำกว่ามักหมายถึง variance น้อยกว่า",
-        5,
+        6,
         "03  Sensitivity Analysis",
         "Holdout ที่ใช้ข้อมูลฝึกน้อยเกินไปมี variance สูงมาก ส่วน K-Fold นิ่งขึ้นเมื่อ k เพิ่ม",
     )
@@ -252,7 +307,7 @@ def build_deck():
         "ผลของจำนวนข้อมูลและระดับ Noise",
         "part4.png",
         "แถวบน = Constant  |  แถวล่าง = Linear  |  น้ำเงิน = Resub  |  ส้ม = Holdout  |  เขียว = K-Fold",
-        6,
+        7,
         "03  Sensitivity Analysis",
         "เมื่อ n เพิ่ม variance ลดลง; เมื่อ σ เพิ่ม variance สูงขึ้น โดย Holdout และ Linear ได้รับผลชัดที่สุด",
     )
