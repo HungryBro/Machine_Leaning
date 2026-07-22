@@ -77,7 +77,8 @@ def learning_curve(f, model, n_list, sigma=0.0, n_datasets=3000, n_test=1000):
             # คำนวณความคลาดเคลื่อนกำลังสองเฉลี่ยบนเซ็ตเทรน (Ein)
             ein_sum += np.mean((fit_predict(model, X, y, X) - y) ** 2)
             # คำนวณความคลาดเคลื่อนบนเซ็ตเทสใหม่ที่มี Noise (Eout)
-            eout_sum += np.mean((fit_predict(model, X, y, x_test) - f(x_test) + np.random.normal(0, sigma, n_test)) ** 2)
+            test_y = f(x_test) + np.random.normal(0, sigma, n_test)
+            eout_sum += np.mean((fit_predict(model, X, y, x_test) - test_y) ** 2)
             
         Ein.append(ein_sum / n_datasets)
         Eout.append(eout_sum / n_datasets)
@@ -85,66 +86,78 @@ def learning_curve(f, model, n_list, sigma=0.0, n_datasets=3000, n_test=1000):
     return Ein, Eout
 
 
-# --- เริ่มต้นประมวลผลหลักและพิมพ์ผลลัพธ์ ---
-print('=' * 80)
-print('Summary Table')
-print('=' * 80)
-print(f"{'Target':<12} {'Model':<22} {'bias^2':<10} {'variance':<10} {'Eout':<10}")
-print('-' * 80)
+# คำนวณ Expected E_out ของข้อมูลทดสอบใหม่ที่มี Gaussian noise ระดับ sigma
+def expected_eout(model, X, y, f, x_test, sigma=0.0):
+    prediction = fit_predict(model, X, y, x_test)
+    signal_error = np.mean((prediction - f(x_test)) ** 2)
+    return float(signal_error + sigma ** 2)
 
-x_plot = np.linspace(-1, 1, 500)
-fig_avg, axes_avg = plt.subplots(2, 3, figsize=(15, 8), sharex=True, sharey=True)
 
-# รันแยก Bias-Variance และสร้างกราฟ Average Fit (2x3 Subplots)
-for row, (target_name, f) in enumerate(TARGETS.items()):
-    for col, model in enumerate(MODELS):
-        sim = simulate(f, model)
-        print(f"{target_name:<12} {model:<22} {sim['bias2']:<10.4f} {sim['variance']:<10.4f} {sim['eout']:<10.4f}")
+def main():
+    # --- เริ่มต้นประมวลผลหลักและพิมพ์ผลลัพธ์ ---
+    print('=' * 80)
+    print('Summary Table')
+    print('=' * 80)
+    print(f"{'Target':<12} {'Model':<22} {'bias^2':<10} {'variance':<10} {'Eout':<10}")
+    print('-' * 80)
 
-        # วาดพล็อตเปรียบเทียบ f(x), g_bar, ช่วง std, และตัวอย่างโมเดล 20 เส้นสีดำบาง
-        ax = axes_avg[row, col]
-        ax.plot(x_plot, f(x_plot), 'g-', linewidth=2, label='Target f(x)')
-        g_bar, std = np.array(sim['g_bar']), np.array(sim['std'])
-        ax.plot(sim['x_test'], g_bar, 'r--', linewidth=2, label='g_bar(x)')
-        ax.fill_between(sim['x_test'], g_bar - std, g_bar + std,
-                        color='red', alpha=0.3, label='±1 std')
-        for _ in range(20):
-            X = np.random.uniform(-1, 1, 2)
-            ax.plot(x_plot, fit_predict(model, X, f(X), x_plot), 'k-', alpha=0.2, linewidth=0.5)
-        ax.set_title(f"{target_name} | {model}")
-        ax.set_xlim(-1, 1)
-        ax.set_ylim(-4, 4)
-        ax.legend(fontsize=9, loc='upper center')
-        ax.grid(True, alpha=0.3)
+    x_plot = np.linspace(-1, 1, 500)
+    fig_avg, axes_avg = plt.subplots(2, 3, figsize=(15, 8), sharex=True, sharey=True)
 
-plt.tight_layout()
-plt.savefig(os.path.join(PLOTS_DIR, 'average_fit.png'), dpi=150)
-print('\nSaved: plots/average_fit.png')
+    # รันแยก Bias-Variance และสร้างกราฟ Average Fit (2x3 Subplots)
+    for row, (target_name, f) in enumerate(TARGETS.items()):
+        for col, model in enumerate(MODELS):
+            sim = simulate(f, model)
+            print(f"{target_name:<12} {model:<22} {sim['bias2']:<10.4f} {sim['variance']:<10.4f} {sim['eout']:<10.4f}")
 
-# รันและวาดกราฟสร้างเส้นพล็อต Learning Curve (2x3 Subplots)
-fig2, axes2 = plt.subplots(2, 3, figsize=(15, 8), sharex=True, sharey='row')
-for row, (target_name, f) in enumerate(TARGETS.items()):
-    ymax = YMAX[target_name]
-    for col, model in enumerate(MODELS):
-        ax = axes2[row, col]
-        for sigma in NOISE:
-            Ein, Eout = learning_curve(f, model, N_LIST, sigma=sigma)
-            ax.plot(N_LIST, np.clip(Ein, 0, ymax), '--', color=COLORS[sigma], label=f'Ein σ={sigma}', alpha=0.7)
-            ax.plot(N_LIST, np.clip(Eout, 0, ymax), '-', color=COLORS[sigma], label=f'Eout σ={sigma}', alpha=0.7)
-        if row == 1:
-            ax.set_xlabel('n')
-        if col == 0:
-            ax.set_ylabel('Expected Error')
-            ax.tick_params(labelleft=True)
-        else:
-            ax.tick_params(labelleft=False)
-        ax.set_title(f'{target_name} | {model}')
-        ax.set_xscale('log')
-        ax.set_ylim(0, ymax)
-        ax.legend(fontsize=9, loc='upper center')
-        ax.grid(True, alpha=0.3)
-plt.tight_layout()
-plt.savefig(os.path.join(PLOTS_DIR, 'learning_curve.png'), dpi=150)
-print('Saved: plots/learning_curve.png')
+            # วาดพล็อตเปรียบเทียบ f(x), g_bar, ช่วง std, และตัวอย่างโมเดล 20 เส้นสีดำบาง
+            ax = axes_avg[row, col]
+            ax.plot(x_plot, f(x_plot), 'g-', linewidth=2, label='Target f(x)')
+            g_bar, std = np.array(sim['g_bar']), np.array(sim['std'])
+            ax.plot(sim['x_test'], g_bar, 'r--', linewidth=2, label='g_bar(x)')
+            ax.fill_between(sim['x_test'], g_bar - std, g_bar + std,
+                            color='red', alpha=0.3, label='±1 std')
+            for _ in range(20):
+                X = np.random.uniform(-1, 1, 2)
+                ax.plot(x_plot, fit_predict(model, X, f(X), x_plot), 'k-', alpha=0.2, linewidth=0.5)
+            ax.set_title(f"{target_name} | {model}")
+            ax.set_xlim(-1, 1)
+            ax.set_ylim(-4, 4)
+            ax.legend(fontsize=9, loc='upper center')
+            ax.grid(True, alpha=0.3)
 
-print('\nDone!')
+    plt.tight_layout()
+    plt.savefig(os.path.join(PLOTS_DIR, 'average_fit.png'), dpi=150)
+    print('\nSaved: plots/average_fit.png')
+
+    # รันและวาดกราฟสร้างเส้นพล็อต Learning Curve (2x3 Subplots)
+    fig2, axes2 = plt.subplots(2, 3, figsize=(15, 8), sharex=True, sharey='row')
+    for row, (target_name, f) in enumerate(TARGETS.items()):
+        ymax = YMAX[target_name]
+        for col, model in enumerate(MODELS):
+            ax = axes2[row, col]
+            for sigma in NOISE:
+                Ein, Eout = learning_curve(f, model, N_LIST, sigma=sigma)
+                ax.plot(N_LIST, np.clip(Ein, 0, ymax), '--', color=COLORS[sigma], label=f'Ein σ={sigma}', alpha=0.7)
+                ax.plot(N_LIST, np.clip(Eout, 0, ymax), '-', color=COLORS[sigma], label=f'Eout σ={sigma}', alpha=0.7)
+            if row == 1:
+                ax.set_xlabel('n')
+            if col == 0:
+                ax.set_ylabel('Expected Error')
+                ax.tick_params(labelleft=True)
+            else:
+                ax.tick_params(labelleft=False)
+            ax.set_title(f'{target_name} | {model}')
+            ax.set_xscale('log')
+            ax.set_ylim(0, ymax)
+            ax.legend(fontsize=9, loc='upper center')
+            ax.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.savefig(os.path.join(PLOTS_DIR, 'learning_curve.png'), dpi=150)
+    print('Saved: plots/learning_curve.png')
+
+    print('\nDone!')
+
+
+if __name__ == '__main__':
+    main()

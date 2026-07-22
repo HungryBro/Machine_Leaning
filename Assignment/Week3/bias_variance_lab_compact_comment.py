@@ -128,7 +128,8 @@ def learning_curve(f, model, n_list, sigma=0.0, n_datasets=3000, n_test=1000):
             ein_sum += np.mean((fit_predict(model, X, y, X) - y) ** 2)
             
             # คำนวณ Eout (Error นอกชุดฝึก): ทำนายผลบน x_test เทียบกับข้อมูลเป้าหมายที่มีการเติม Noise ลงไปด้วย
-            eout_sum += np.mean((fit_predict(model, X, y, x_test) - f(x_test) + np.random.normal(0, sigma, n_test)) ** 2)
+            test_y = f(x_test) + np.random.normal(0, sigma, n_test)
+            eout_sum += np.mean((fit_predict(model, X, y, x_test) - test_y) ** 2)
             
         # หาค่าเฉลี่ยข้อผิดพลาดที่คำนวณได้จาก 3,000 รอบนั้น บันทึกเพิ่มลงในลิสต์ผลรวม Ein และ Eout
         Ein.append(ein_sum / n_datasets)
