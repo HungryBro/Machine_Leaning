@@ -12,8 +12,8 @@ import numpy as np
 HERE = Path(__file__).resolve().parent
 WEEK = HERE.parent
 sys.path[:0] = [str(WEEK / "Week3"), str(WEEK / "Week4")]
-from bias_variance_lab_compact import EOUT_GRID, SEED, reference_data, sin_target
-from HW2 import gen_data
+from bias_variance_lab_compact import EOUT_GRID, SEED, reference_data, sin_target  # pyright: ignore
+from HW2 import gen_data  # pyright: ignore
 
 DATA, PLOTS, RESULTS = HERE / "sin experiment", HERE / "plots", HERE / "results"
 NS, WEKA_D, SIGMAS = [10, 20, 40, 80], [1, 3, 8], [0.0, 0.3, 0.6]

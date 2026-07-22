@@ -12,7 +12,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, 'plots')
 os.makedirs(OUT, exist_ok=True)
 sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', 'Week3')))
-from bias_variance_lab_compact import (SEED, EOUT_GRID, sin_target, fit_predict,
+from bias_variance_lab_compact import (SEED, EOUT_GRID, sin_target, fit_predict,  # pyright: ignore
                                        eout_parts, expected_eout, reference_data)
 
 MODELS, METHODS = ['Constant', 'Linear', 'Linear through origin'], ['Resub', 'Holdout', 'KFold']
