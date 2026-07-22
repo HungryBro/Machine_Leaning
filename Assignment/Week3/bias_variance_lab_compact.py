@@ -1,162 +1,210 @@
 import os
 import numpy as np
 import matplotlib
-# ตั้งค่า matplotlib ให้บันทึกไฟล์ภาพโดยไม่ต้องมี GUI/หน้าต่างแสดงผล
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-# ล็อคการสุ่มเพื่อให้ผลลัพธ์การสุ่มคงที่ (สร้างผลลัพธ์ซ้ำได้)
-np.random.seed(42)
-
-# จัดการเกี่ยวกับเส้นทางจัดเก็บไฟล์
+SEED = 42
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PLOTS_DIR = os.path.join(BASE_DIR, 'plots')
 os.makedirs(PLOTS_DIR, exist_ok=True)
 
-# กำหนดฟังก์ชันเป้าหมาย f(x) และชนิดของโมเดล
-TARGETS = {'sin(pi*x)': lambda x: np.sin(np.pi * x), 'x^2': lambda x: x ** 2}
-MODELS = ['Constant', 'Linear', 'Linear through origin']
-NOISE = [0.0, 0.3]
 
-# กำหนดสีสำหรับแต่ละระดับเสียงรบกวน (Noise level) และลิสต์ขนาดข้อมูล N สำหรับทำ Learning Curve
-COLORS = {0.0: '#0072B2', 0.3: '#D55E00'}
+def sin_target(x):
+    return np.sin(np.pi * np.asarray(x))
+
+
+def square_target(x):
+    return np.asarray(x) ** 2
+
+
+TARGETS = {'sin(pi*x)': sin_target, 'x^2': square_target}
+MODELS = ['Constant', 'Linear', 'Linear through origin']
+NOISE = [0.0, 0.1, 0.3]
+COLORS = {0.0: '#0072B2', 0.1: '#009E73', 0.3: '#D55E00'}
 N_LIST = [2, 3, 4, 5, 7, 10, 15, 20, 30, 50, 100]
 YMAX = {'x^2': 0.6, 'sin(pi*x)': 1.0}
+EOUT_GRID = np.linspace(-1, 1, 4000)
 
 
-# ฟังก์ชันสำหรับเทรนและทำนายผลการพยากรณ์ของแต่ละโมเดล
 def fit_predict(model, X, y, xq):
-    X, y, xq = map(np.asarray, (X, y, xq)) # แปลงข้อมูลทั้งหมดเป็น Numpy Array
-    
+    X, y, xq = map(np.asarray, (X, y, xq))
     if model == 'Constant':
-        # โมเดลค่าคงที่: คาดเดาเป็นค่าเฉลี่ยของ y เสมอ
-        return np.full_like(xq, np.mean(y))
-        
+        return np.full(xq.shape, y.mean(), dtype=float)
     if model == 'Linear':
-        # โมเดลเชิงเส้นตรง (h(x) = w0 + w1*x): ฟิตหาจุดตัดและน้ำหนักด้วย Least Squares
-        w = np.linalg.lstsq(np.column_stack([np.ones(len(X)), X]), y, rcond=None)[0]
+        w = np.linalg.lstsq(np.c_[np.ones(len(X)), X], y, rcond=None)[0]
         return w[0] + w[1] * xq
-        
-    # โมเดลเชิงเส้นผ่านจุดกำเนิด (h(x) = w*x)
-    return np.linalg.lstsq(X.reshape(-1, 1), y, rcond=None)[0] * xq
+    w = np.linalg.lstsq(X[:, None], y, rcond=None)[0][0]
+    return w * xq
 
 
-# ฟังก์ชันรัน Simulation เพื่อประมาณค่า Bias^2 และ Variance ด้วยวิธี Monte Carlo
+def eout_parts(model, X, y, f=sin_target, x_test=EOUT_GRID, sigma=0.0):
+    signal = float(np.mean((fit_predict(model, X, y, x_test) - f(x_test)) ** 2))
+    noise = float(sigma ** 2)
+    return signal, noise, signal + noise
+
+
+def expected_eout(model, X, y, f=sin_target, x_test=EOUT_GRID, sigma=0.0):
+    return eout_parts(model, X, y, f, x_test, sigma)[2]
+
+
+def reference_data(n=20, sigma=0.3, seed=SEED):
+    rng = np.random.default_rng(seed)
+    X = rng.uniform(-1, 1, n)
+    return X, sin_target(X) + rng.normal(0, sigma, n)
+
+
 def simulate(f, model, n_datasets=50000, n_test=300):
-    x_test = np.linspace(-1, 1, n_test)
-    preds = np.zeros((n_datasets, n_test))
-    
-    # วนลูปสุ่มชุดข้อมูลเพื่อมาเทรนและเก็บผลลัพธ์ทำนาย 50,000 รอบ
+    x = np.linspace(-1, 1, n_test)
+    preds = np.empty((n_datasets, n_test))
     for i in range(n_datasets):
-        X = np.random.uniform(-1, 1, 2) # สุ่มข้อมูลขนาด N = 2 จุด
-        preds[i] = fit_predict(model, X, f(X), x_test)
-        
-    # หาโมเดลทำนายเฉลี่ย (g_bar) และส่วนเบี่ยงเบนมาตรฐาน (std) ณ แต่ละจุด x_test
-    g_bar, std = preds.mean(axis=0), preds.std(axis=0)
-    
-    # แยกคำนวณ Bias^2 และ Variance
-    bias2 = np.mean((g_bar - f(x_test)) ** 2)
+        X = np.random.uniform(-1, 1, 2)
+        preds[i] = fit_predict(model, X, f(X), x)
+    mean, std = preds.mean(0), preds.std(0)
+    bias2 = np.mean((mean - f(x)) ** 2)
     variance = np.mean(np.var(preds, axis=0))
-    
-    return {'bias2': float(bias2), 'variance': float(variance), 'eout': float(bias2 + variance),
-            'g_bar': g_bar.tolist(), 'std': std.tolist(), 'x_test': x_test.tolist()}
+    return dict(bias2=float(bias2), variance=float(variance),
+                eout=float(bias2 + variance), g_bar=mean, std=std, x_test=x)
 
 
-# ฟังก์ชันจำลองเพื่อคำนวณ Ein และ Eout สำหรับสร้างกราฟ Learning Curve
-def learning_curve(f, model, n_list, sigma=0.0, n_datasets=3000, n_test=1000):
-    x_test = np.linspace(-1, 1, n_test)
-    Ein, Eout = [], []
-    
+def analytical_bias_variance(f, model, q=401, n_test=1000):
+    """Numerically integrate over x and the two training inputs (n=2)."""
+    x = np.linspace(-1, 1, n_test)
+    fx = f(x)
+    average_x = lambda values: float(np.trapezoid(values, x) / 2)
+
+    if model == 'Constant':
+        mean_f = average_x(fx)
+        return (average_x((mean_f - fx) ** 2),
+                0.5 * (average_x(fx ** 2) - mean_f ** 2))
+
+    z = np.linspace(-1, 1, q)
+    x1, x2 = np.meshgrid(z, z, indexing='ij')
+    x1, x2 = x1.ravel(), x2.ravel()
+    y1, y2 = f(x1), f(x2)
+    eps = 1e-8
+
+    if model == 'Linear':
+        denominator = x1 - x2
+        slope = np.divide(y1 - y2, denominator, out=np.zeros_like(denominator),
+                          where=np.abs(denominator) > eps)
+        near = np.abs(denominator) <= eps
+        if np.any(near):
+            h = 1e-6
+            slope[near] = (f(x1[near] + h) - f(x1[near] - h)) / (2 * h)
+        intercept = y1 - slope * x1
+    else:
+        denominator = x1 ** 2 + x2 ** 2
+        slope = np.divide(x1 * y1 + x2 * y2, denominator,
+                          out=np.zeros_like(denominator), where=denominator > eps)
+        near = denominator <= eps
+        if np.any(near):
+            h = 1e-6
+            slope[near] = (f(h) - f(-h)) / (2 * h)
+        intercept = np.zeros_like(slope)
+
+    grid_weights = np.ones(q)
+    grid_weights[[0, -1]] = 0.5
+    pair_weights = np.outer(grid_weights, grid_weights).ravel()
+    normalizer = pair_weights.sum()
+    mean_prediction = np.zeros(n_test)
+    second_moment = np.zeros(n_test)
+    batch = 5000
+    for start in range(0, len(pair_weights), batch):
+        stop = start + batch
+        prediction = intercept[start:stop, None] + slope[start:stop, None] * x
+        weights = pair_weights[start:stop, None]
+        mean_prediction += (prediction * weights).sum(axis=0)
+        second_moment += ((prediction ** 2) * weights).sum(axis=0)
+    mean_prediction /= normalizer
+    variance = np.maximum(second_moment / normalizer - mean_prediction ** 2, 0)
+    return average_x((mean_prediction - fx) ** 2), average_x(variance)
+
+
+def learning_curve(f, model, n_list=N_LIST, sigma=0.0, n_datasets=3000, n_test=1000):
+    x_test, ein, eout = np.linspace(-1, 1, n_test), [], []
     for n in n_list:
-        ein_sum = eout_sum = 0.0
-        # รันจำลองรอบละ 3,000 ชุดข้อมูล เพื่อหาค่าเฉลี่ยข้อผิดพลาดในและนอกโมเดล
+        ins = outs = 0.0
         for _ in range(n_datasets):
             X = np.random.uniform(-1, 1, n)
-            y = f(X) + np.random.normal(0, sigma, n) # บวก Noise (sigma) ลงในคำตอบของเทรนเซ็ต
-            
-            # คำนวณความคลาดเคลื่อนกำลังสองเฉลี่ยบนเซ็ตเทรน (Ein)
-            ein_sum += np.mean((fit_predict(model, X, y, X) - y) ** 2)
-            # คำนวณความคลาดเคลื่อนบนเซ็ตเทสใหม่ที่มี Noise (Eout)
-            test_y = f(x_test) + np.random.normal(0, sigma, n_test)
-            eout_sum += np.mean((fit_predict(model, X, y, x_test) - test_y) ** 2)
-            
-        Ein.append(ein_sum / n_datasets)
-        Eout.append(eout_sum / n_datasets)
-        
-    return Ein, Eout
+            y = f(X) + np.random.normal(0, sigma, n)
+            ins += np.mean((fit_predict(model, X, y, X) - y) ** 2)
+            outs += expected_eout(model, X, y, f, x_test, sigma)
+        ein.append(ins / n_datasets)
+        eout.append(outs / n_datasets)
+    return ein, eout
 
 
-# คำนวณ Expected E_out ของข้อมูลทดสอบใหม่ที่มี Gaussian noise ระดับ sigma
-def expected_eout(model, X, y, f, x_test, sigma=0.0):
-    prediction = fit_predict(model, X, y, x_test)
-    signal_error = np.mean((prediction - f(x_test)) ** 2)
-    return float(signal_error + sigma ** 2)
+def print_reference_table():
+    n, sigma = 20, 0.3
+    X, y = reference_data(n, sigma, SEED)
+    print('\n' + '-' * 72)
+    print('REFERENCE DATASET')
+    print(f'Setup: target=sin(pi*x), x~U(-1,1), n={n}, sigma={sigma}, noise variance={sigma ** 2:.4f}')
+    print(f"{'Model':<22} {'Ein':>10} {'Signal':>10} {'Noise^2':>10} {'Eout':>10}")
+    print('-' * 72)
+    for model in MODELS:
+        signal, noise, eout = eout_parts(model, X, y, sigma=sigma)
+        ein = np.mean((fit_predict(model, X, y, X) - y) ** 2)
+        print(f'{model:<22} {ein:10.6f} {signal:10.6f} {noise:10.6f} {eout:10.6f}')
 
 
 def main():
-    # --- เริ่มต้นประมวลผลหลักและพิมพ์ผลลัพธ์ ---
-    print('=' * 80)
-    print('Summary Table')
-    print('=' * 80)
-    print(f"{'Target':<12} {'Model':<22} {'bias^2':<10} {'variance':<10} {'Eout':<10}")
-    print('-' * 80)
+    np.random.seed(SEED)
+    print('\n' + '=' * 72)
+    print('WEEK 3: BIAS-VARIANCE')
+    print('Plots: average fit and learning curves')
+    print('=' * 72)
+    print_reference_table()
+
+    print('\n' + '-' * 110)
+    print('BIAS-VARIANCE: ANALYTICAL VS SIMULATION (n=2, sigma=0)')
+    print(f"{'Target':<12} {'Model':<22} {'Bias^2 ana':>12} {'Var ana':>12} "
+          f"{'Eout ana':>12} {'Eout sim':>12}")
+    print('-' * 110)
 
     x_plot = np.linspace(-1, 1, 500)
-    fig_avg, axes_avg = plt.subplots(2, 3, figsize=(15, 8), sharex=True, sharey=True)
-
-    # รันแยก Bias-Variance และสร้างกราฟ Average Fit (2x3 Subplots)
-    for row, (target_name, f) in enumerate(TARGETS.items()):
+    fig, axes = plt.subplots(2, 3, figsize=(15, 8), sharex=True, sharey=True)
+    for row, (name, f) in enumerate(TARGETS.items()):
         for col, model in enumerate(MODELS):
-            sim = simulate(f, model)
-            print(f"{target_name:<12} {model:<22} {sim['bias2']:<10.4f} {sim['variance']:<10.4f} {sim['eout']:<10.4f}")
-
-            # วาดพล็อตเปรียบเทียบ f(x), g_bar, ช่วง std, และตัวอย่างโมเดล 20 เส้นสีดำบาง
-            ax = axes_avg[row, col]
-            ax.plot(x_plot, f(x_plot), 'g-', linewidth=2, label='Target f(x)')
-            g_bar, std = np.array(sim['g_bar']), np.array(sim['std'])
-            ax.plot(sim['x_test'], g_bar, 'r--', linewidth=2, label='g_bar(x)')
-            ax.fill_between(sim['x_test'], g_bar - std, g_bar + std,
+            s = simulate(f, model)
+            bias2, variance = analytical_bias_variance(f, model)
+            print(f'{name:<12} {model:<22} {bias2:12.4f} {variance:12.4f} '
+                  f'{bias2 + variance:12.4f} {s["eout"]:12.4f}')
+            ax = axes[row, col]
+            ax.plot(x_plot, f(x_plot), 'g-', lw=2, label='Target f(x)')
+            ax.plot(s['x_test'], s['g_bar'], 'r--', lw=2, label='g_bar(x)')
+            ax.fill_between(s['x_test'], s['g_bar'] - s['std'], s['g_bar'] + s['std'],
                             color='red', alpha=0.3, label='±1 std')
             for _ in range(20):
                 X = np.random.uniform(-1, 1, 2)
-                ax.plot(x_plot, fit_predict(model, X, f(X), x_plot), 'k-', alpha=0.2, linewidth=0.5)
-            ax.set_title(f"{target_name} | {model}")
-            ax.set_xlim(-1, 1)
-            ax.set_ylim(-4, 4)
-            ax.legend(fontsize=9, loc='upper center')
-            ax.grid(True, alpha=0.3)
+                ax.plot(x_plot, fit_predict(model, X, f(X), x_plot), 'k-', alpha=0.2, lw=0.5)
+            ax.set(title=f'{name} | {model}', xlim=(-1, 1), ylim=(-4, 4))
+            ax.legend(fontsize=9, loc='upper center'); ax.grid(alpha=0.3)
+    plt.tight_layout(); plt.savefig(os.path.join(PLOTS_DIR, 'average_fit.png'), dpi=150); plt.close(fig)
 
-    plt.tight_layout()
-    plt.savefig(os.path.join(PLOTS_DIR, 'average_fit.png'), dpi=150)
-    print('\nSaved: plots/average_fit.png')
-
-    # รันและวาดกราฟสร้างเส้นพล็อต Learning Curve (2x3 Subplots)
-    fig2, axes2 = plt.subplots(2, 3, figsize=(15, 8), sharex=True, sharey='row')
-    for row, (target_name, f) in enumerate(TARGETS.items()):
-        ymax = YMAX[target_name]
+    print('\n' + '=' * 72)
+    print('Creating learning-curve plot...')
+    print('=' * 72)
+    fig, axes = plt.subplots(2, 3, figsize=(15, 8), sharex=True, sharey='row')
+    for row, (name, f) in enumerate(TARGETS.items()):
         for col, model in enumerate(MODELS):
-            ax = axes2[row, col]
+            ax = axes[row, col]
+            curves = {}
             for sigma in NOISE:
-                Ein, Eout = learning_curve(f, model, N_LIST, sigma=sigma)
-                ax.plot(N_LIST, np.clip(Ein, 0, ymax), '--', color=COLORS[sigma], label=f'Ein σ={sigma}', alpha=0.7)
-                ax.plot(N_LIST, np.clip(Eout, 0, ymax), '-', color=COLORS[sigma], label=f'Eout σ={sigma}', alpha=0.7)
-            if row == 1:
-                ax.set_xlabel('n')
-            if col == 0:
-                ax.set_ylabel('Expected Error')
-                ax.tick_params(labelleft=True)
-            else:
-                ax.tick_params(labelleft=False)
-            ax.set_title(f'{target_name} | {model}')
-            ax.set_xscale('log')
-            ax.set_ylim(0, ymax)
-            ax.legend(fontsize=9, loc='upper center')
-            ax.grid(True, alpha=0.3)
-    plt.tight_layout()
-    plt.savefig(os.path.join(PLOTS_DIR, 'learning_curve.png'), dpi=150)
-    print('Saved: plots/learning_curve.png')
-
-    print('\nDone!')
+                ein, eout = learning_curve(f, model, sigma=sigma)
+                curves[sigma] = (ein, eout)
+                ax.plot(N_LIST, np.clip(ein, 0, YMAX[name]), '--', color=COLORS[sigma],
+                        label=f'Ein σ={sigma}', alpha=0.7)
+                ax.plot(N_LIST, np.clip(eout, 0, YMAX[name]), '-', color=COLORS[sigma],
+                        label=f'Eout σ={sigma}', alpha=0.7)
+            if row == 1: ax.set_xlabel('n')
+            if col == 0: ax.set_ylabel('Expected Error')
+            else: ax.tick_params(labelleft=False)
+            ax.set(title=f'{name} | {model}', xscale='log', ylim=(0, YMAX[name]))
+            ax.legend(fontsize=9, loc='upper center'); ax.grid(alpha=0.3)
+    plt.tight_layout(); plt.savefig(os.path.join(PLOTS_DIR, 'learning_curve.png'), dpi=150); plt.close(fig)
+    print('\nSaved: plots/average_fit.png, plots/learning_curve.png')
 
 
 if __name__ == '__main__':
