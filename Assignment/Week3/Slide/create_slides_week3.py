@@ -182,8 +182,8 @@ def add_setup_slide(prs):
     add_card(slide, 6.55, 1.35, 2.85, 1.6, "เป้าหมาย", "sin(πx)\nและ  x²", TEAL, PALE_TEAL, 14, 20)
     add_card(slide, 9.62, 1.35, 2.85, 1.6, "โมเดล", "Constant\nLinear\nผ่านจุดกำเนิด", ORANGE, PALE_ORANGE, 14, 17)
     add_card(slide, 6.55, 3.25, 2.85, 1.6, "ข้อมูลฝึก", "n = 2\nสุ่ม 50,000 ชุด", GREEN, PALE_TEAL, 14, 18)
-    add_card(slide, 9.62, 3.25, 2.85, 1.6, "วิธี fit", "Normal Equation\nnumpy.linalg.lstsq", RED, PALE_ORANGE, 14, 16)
-    add_card(slide, 6.55, 5.15, 5.92, 1.0, "Learning curve", "เพิ่ม n = 2 → 100 และเปรียบเทียบ Ein / Eout ที่ σ = 0.0 และ 0.3",
+    add_card(slide, 9.62, 3.25, 2.85, 1.6, "วิธีคำนวณ", "Fit: numpy.linalg.lstsq\nAnalytical + simulation", RED, PALE_ORANGE, 14, 15)
+    add_card(slide, 6.55, 5.15, 5.92, 1.0, "Learning curve", "เพิ่ม n = 2 → 100 และเปรียบเทียบ Ein / Eout ที่ σ = 0.0, 0.1 และ 0.3",
              TEAL, LIGHT, 14, 15)
     add_footer(slide, 2)
     return slide
@@ -222,7 +222,7 @@ def add_concept_slide(prs):
 def add_results_slide(prs, target, rows, takeaway, page, kicker):
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     add_header(slide, f"ผลลัพธ์เมื่อเป้าหมายคือ {target}", page, kicker)
-    add_text(slide, "ค่าเฉลี่ยจากการสุ่มชุดข้อมูลฝึก n = 2 จำนวน 50,000 ชุด",
+    add_text(slide, "ค่าเฉลี่ยจากชุดข้อมูลฝึก n = 2 จำนวน 50,000 ชุด | Analytical ใช้ numerical integration",
              0.72, 1.25, 7.5, 0.3, size=13, color=MUTED, margin=0)
 
     x, y, w, h = 0.62, 1.58, 12.08, 2.78
@@ -246,7 +246,7 @@ def add_results_slide(prs, target, rows, takeaway, page, kicker):
             set_font(run, size, color, bold)
 
     # Single-level header
-    headers = ["โมเดล", "Bias² (มือ)", "Variance (มือ)", "Eout (มือ)", "Eout (sim)"]
+    headers = ["โมเดล", "Bias² (ana)", "Variance (ana)", "Eout (ana)", "Eout (sim)"]
     for j, val in enumerate(headers):
         align = PP_ALIGN.LEFT if j == 0 else PP_ALIGN.CENTER
         style_cell(table.cell(0, j), val, GREEN, WHITE, 12, True, align)
@@ -265,7 +265,7 @@ def add_results_slide(prs, target, rows, takeaway, page, kicker):
     add_rect(slide, 0.62, 4.82, 0.06, 1.1, RED)
     add_text(slide, takeaway.replace("\n", "  "), 0.9, 4.83, 11.55, 0.86,
              size=16, color=INK, margin=0)
-    add_text(slide, "คำนวณมือ: จาก คำนวณมือ.pdf  |  โค้ด: simulation จาก results.json  |  สีเขียวอ่อน = Eout จากโค้ดต่ำสุด",
+    add_text(slide, "Analytical: numerical integration  |  Simulation: 50,000 ชุดข้อมูล  |  สีเขียวอ่อน = Eout (sim) ต่ำสุด",
              0.62, 6.27, 12.0, 0.3, size=10, color=MUTED, margin=0)
     return slide
 
@@ -302,20 +302,20 @@ def build_deck():
     add_title_slide(prs)
     add_concept_slide(prs)
     add_results_slide(prs, "sin(πx)", [
-        ["Constant", "0.5000", "0.2500", "0.7500", "0.7491"],
-        ["Linear", "0.2060", "1.6703", "1.8763", "1.8625"],
-        ["Linear ผ่านจุดกำเนิด", "0.2718", "0.2372", "0.5090", "0.5151"],
-    ], "Linear มี Bias² ต่ำ\nแต่ Variance สูงมาก\n\nผู้ชนะ: Linear ผ่านจุดกำเนิด\nเพราะ Eout ต่ำสุด", 3, "02  ผลลัพธ์ Bias-Variance")
+        ["Constant", "0.5000", "0.2500", "0.7500", "0.7483"],
+        ["Linear", "0.2067", "1.6763", "1.8830", "1.8835"],
+        ["Linear ผ่านจุดกำเนิด", "0.2706", "0.2366", "0.5072", "0.5135"],
+    ], "Linear มี Bias² ต่ำ\nแต่ Variance สูงมาก\n\nEout (sim) ต่ำสุดอยู่ที่\nLinear ผ่านจุดกำเนิด ≈ 0.51", 3, "02  ผลลัพธ์ Bias-Variance")
     add_results_slide(prs, "x²", [
         ["Constant", "0.0889", "0.0444", "0.1333", "0.1346"],
-        ["Linear", "0.2000", "0.3333", "0.5333", "0.5414"],
-        ["Linear ผ่านจุดกำเนิด", "0.2000", "0.1147", "0.3147", "0.3182"],
+        ["Linear", "0.2000", "0.3333", "0.5333", "0.5342"],
+        ["Linear ผ่านจุดกำเนิด", "0.2000", "0.1149", "0.3149", "0.3185"],
     ], "Constant ชนะอย่างชัดเจน\nเพราะ x² สมมาตร\n\nความซับซ้อนเพิ่มขึ้น\nไม่ได้ช่วยให้ Eout ต่ำลง", 4, "02  ผลลัพธ์ Bias-Variance")
     add_image_slide(prs, "ภาพรวม: โมเดลเฉลี่ยและความแกว่ง", PLOTS_DIR / "average_fit.png",
                     "เส้นเขียว = เป้าหมายจริง  |  เส้นประแดง = โมเดลเฉลี่ย  |  แถบแดง = ±1 std  |  เส้นเทา = ตัวอย่างโมเดลจากชุดข้อมูลต่างกัน",
                     5, "03  ภาพประกอบ")
     add_image_slide(prs, "Learning Curve: เมื่อเพิ่มจำนวนข้อมูล", PLOTS_DIR / "learning_curve.png",
-                    "เส้นประ = Ein  |  เส้นทึบ = Eout  |  สีน้ำเงิน = σ 0.0  |  สีส้ม = σ 0.3  |  อ่านแนวโน้มจากซ้ายไปขวาเมื่อ n เพิ่มขึ้น",
+                    "เส้นประ = Ein  |  เส้นทึบ = Eout  |  น้ำเงิน = σ 0.0  |  เขียว = σ 0.1  |  ส้ม = σ 0.3  |  อ่านแนวโน้มเมื่อ n เพิ่มขึ้น",
                     6, "03  ภาพประกอบ")
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     prs.save(OUTPUT)

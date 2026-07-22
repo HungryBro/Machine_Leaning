@@ -158,7 +158,7 @@ def add_setup_slide(prs):
     add_text(slide, "เปรียบเทียบวิธีวัด error กับค่า true Eout ที่รู้จากการจำลอง",
              0.72, 2.78, 5.3, 0.45, size=15, color=MUTED, margin=0)
     add_card(slide, 6.55, 1.35, 2.85, 1.6, "เป้าหมาย", "f(x) = sin(πx)\nx ~ U(−1, 1)", TEAL, PALE_TEAL, 14, 18)
-    add_card(slide, 9.62, 1.35, 2.85, 1.6, "โมเดล", "Constant\nLinear", ORANGE, PALE_ORANGE, 14, 19)
+    add_card(slide, 9.62, 1.35, 2.85, 1.6, "โมเดล", "Constant\nLinear\nผ่านจุดกำเนิด", ORANGE, PALE_ORANGE, 14, 17)
     add_card(slide, 6.55, 3.25, 2.85, 1.6, "ข้อมูล", "n = 20\nσ = 0.3", GREEN, PALE_TEAL, 14, 19)
     add_card(slide, 9.62, 3.25, 2.85, 1.6, "การทดลอง", "2,000 ชุดข้อมูล\n5-Fold CV", RED, PALE_ORANGE, 14, 18)
     add_card(slide, 6.55, 5.15, 5.92, 1.0, "ค่าอ้างอิง", "true Eout คำนวณบน grid 4,000 จุด และบวก noise² เพื่อสะท้อนข้อมูลใหม่",
@@ -197,7 +197,7 @@ def add_results_table_slide(prs):
     add_text(slide, "ผลจากข้อมูลชุดเดียวที่ n = 20 และ σ = 0.3 — ค่าทั้งหมดมาจากโค้ด Week4",
              0.72, 1.25, 11.8, 0.3, size=13, color=MUTED, margin=0)
 
-    table = slide.shapes.add_table(3, 5, Inches(0.62), Inches(1.68), Inches(12.08), Inches(2.0)).table
+    table = slide.shapes.add_table(4, 5, Inches(0.62), Inches(1.68), Inches(12.08), Inches(2.35)).table
     col_widths = [2.55, 2.35, 2.55, 2.25, 2.38]
     for idx, width in enumerate(col_widths):
         table.columns[idx].width = Inches(width)
@@ -222,8 +222,9 @@ def add_results_table_slide(prs):
                    PP_ALIGN.LEFT if j == 0 else PP_ALIGN.CENTER)
 
     rows = [
-        ["Constant", "0.6343", "0.4577", "0.7149", "0.5067"],
-        ["Linear", "0.3003", "0.3066", "0.5889", "0.3905"],
+        ["Constant", "0.6565", "0.4264", "0.4739", "0.4638"],
+        ["Linear", "0.3003", "0.1519", "0.2215", "0.1848"],
+        ["Linear ผ่านจุดกำเนิด", "0.2868", "0.1651", "0.1128", "0.1962"],
     ]
     for i, row in enumerate(rows, start=1):
         fill = WHITE if i == 1 else LIGHT
@@ -231,13 +232,13 @@ def add_results_table_slide(prs):
             style_cell(table.cell(i, j), value, fill, INK, 13, False,
                        PP_ALIGN.LEFT if j == 0 else PP_ALIGN.CENTER)
 
-    add_text(slide, "ข้อสังเกต", 0.62, 4.18, 3.2, 0.3, size=18, color=INK, bold=True, margin=0)
-    add_rect(slide, 0.62, 4.58, 0.06, 1.12, RED)
+    add_text(slide, "ข้อสังเกต", 0.62, 4.38, 3.2, 0.3, size=18, color=INK, bold=True, margin=0)
+    add_rect(slide, 0.62, 4.78, 0.06, 0.92, RED)
     add_text(slide,
              "Resubstitution มีแนวโน้มประเมิน error ต่ำกว่าค่า true Eout เพราะใช้ข้อมูลชุดฝึกเดิมในการทดสอบ\n"
              "ส่วน Holdout แปรผันตามการแบ่งข้อมูล และ K-Fold ใช้ข้อมูลได้คุ้มกว่าด้วยการสลับ validation fold",
-             0.9, 4.59, 11.55, 0.88, size=16, color=INK, margin=0)
-    add_text(slide, "นิยามเดียวกับ Week3: Eout = signal error + Noise²  |  ตัวเลขต่างกันเพราะ Week3 ใช้ n=2, σ=0 แต่ Week4 ใช้ n=20, σ=0.3",
+             0.9, 4.79, 11.55, 0.72, size=15, color=INK, margin=0)
+    add_text(slide, "Eout = signal error + Noise²  |  true Eout ใช้ test grid 4,000 จุด และ Noise² = σ² = 0.09",
              0.62, 6.27, 12.0, 0.3, size=10, color=MUTED, margin=0)
     add_footer(slide, 4)
     return slide
@@ -265,7 +266,7 @@ def add_summary_slide(prs):
              "Holdout ไวต่อสัดส่วน train / test\n\nK-Fold ใช้ข้อมูลคุ้มกว่า\nและมักมี variance ต่ำลงเมื่อ k เพิ่ม",
              TEAL, PALE_TEAL, 15, 18)
     add_card(slide, 8.88, 1.42, 3.72, 3.35, "03  ข้อมูลช่วยลด variance",
-             "เพิ่ม n ทำให้ค่าประมาณนิ่งขึ้น\n\nnoise สูงขึ้น → variance สูงขึ้น\nโดยเฉพาะ Linear + Holdout",
+             "เพิ่ม n ทำให้ค่าประมาณนิ่งขึ้น\n\nnoise สูงขึ้น → variance สูงขึ้น\nเห็นชัดใน Linear และ Holdout",
              GREEN, LIGHT, 15, 18)
     add_rect(slide, 1.2, 5.45, 10.95, 0.95, NAVY)
     add_text(slide, "ประโยคสรุปสำหรับการนำเสนอ", 1.5, 5.64, 2.7, 0.22,
@@ -306,7 +307,7 @@ def build_deck():
         prs,
         "ผลของจำนวนข้อมูลและระดับ Noise",
         "part4.png",
-        "แถวบน = Constant  |  แถวล่าง = Linear  |  น้ำเงิน = Resub  |  ส้ม = Holdout  |  เขียว = K-Fold",
+        "แถวบน = Constant  |  แถวกลาง = Linear  |  แถวล่าง = Linear ผ่านจุดกำเนิด  |  น้ำเงิน = Resub  |  ส้ม = Holdout  |  เขียว = K-Fold",
         7,
         "03  Sensitivity Analysis",
         "เมื่อ n เพิ่ม variance ลดลง; เมื่อ σ เพิ่ม variance สูงขึ้น โดย Holdout และ Linear ได้รับผลชัดที่สุด",
