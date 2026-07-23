@@ -447,9 +447,27 @@ ol.steps li::before{content:counter(step);flex:none;width:2rem;height:2rem;borde
 <section class="slide" id="s18">
   <div class="eyebrow">Sensitivity table</div>
   <h2>ตารางสรุปผลของ n และ σ</h2>
+  <div class="grid three" style="margin-bottom:1rem">
+    <div class="card accent">
+      <h3>ตัวแปรข้อมูล</h3>
+      <p class="small"><b>n</b> = จำนวนตัวอย่างในชุดข้อมูล</p>
+      <p class="small"><b>σ</b> = ส่วนเบี่ยงเบนมาตรฐานของ noise ใน<br><span class="math">y = sin(πx) + ε</span></p>
+    </div>
+    <div class="card good">
+      <h3>ดีกรีที่เลือก</h3>
+      <p class="small"><b>best Ein</b> = degree ที่ทำให้ค่าเฉลี่ย Training MSE ต่ำสุด</p>
+      <p class="small"><b>best CV</b> = degree ที่ทำให้ค่าเฉลี่ย 10-fold CV MSE ต่ำสุด</p>
+      <p class="small"><b>best Eout</b> = degree ที่ทำให้ค่าเฉลี่ย True Eout ต่ำสุด</p>
+    </div>
+    <div class="card warn">
+      <h3>ตัวชี้วัด Overfitting</h3>
+      <p class="small"><b>gap@D</b> = Eout(D) − Ein(D)<br>ในงานนี้ D = 8</p>
+      <p class="small"><b>median max|w|@D</b> = มัธยฐานของค่าสัมประสิทธิ์ที่มีขนาดมากที่สุดของ degree 8</p>
+    </div>
+  </div>
   <div class="table-wrap"><table id="sensitivityTable"></table></div>
   <div class="callout" style="margin-top:1rem"><strong>ทำตารางนี้เพื่ออะไร?</strong> ใช้สรุปผลการทดลองทุกคู่ของ n และ σ ในแถวเดียว เพื่อเปรียบเทียบการเลือก degree และขนาด overfitting อย่างเป็นระบบ</div>
-  <p class="small" style="margin-top:1rem">gap@D = Eout ของ degree 8 − Ein ของ degree 8 ใช้เป็นตัวชี้วัดความรุนแรงของ overfitting; ค่ายิ่งมากยิ่งแยก train กับ test มาก</p>
+  <p class="small" style="margin-top:1rem"><b>การตีความ:</b> gap@D ยิ่งมาก หมายถึง degree 8 ทำคะแนนบน train ดี แต่ทำนายข้อมูลใหม่แย่กว่าเดิมมาก จึงมี overfitting รุนแรง ส่วน median max|w|@D ยิ่งมาก แสดงว่าเส้น polynomial มีความไม่เสถียรและไวต่อ noise มากขึ้น</p>
   <div class="callout"><strong>ตัวอย่าง:</strong> n = 10, σ = 0.3 มี gap@D ≈ 37,291,336 ซึ่งรุนแรงมาก ขณะที่ n = 80, σ = 0.3 เหลือประมาณ 0.0241</div>
   <div class="footer"><span>CSV: n_sigma_summary.csv</span><span>18</span></div>
 </section>
