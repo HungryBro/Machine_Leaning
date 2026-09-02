@@ -89,7 +89,7 @@ plt.tight_layout()
 plt.savefig(os.path.join(PLOTS_DIR, 'average_fit.png'), dpi=150)
 print('\nSaved: plots/average_fit.png')
 
-# Combined 2x3 learning curves: rows=targets, cols=models
+
 fig2, axes2 = plt.subplots(2, 3, figsize=(15, 8), sharex=True, sharey='row')
 for row, (target_name, f) in enumerate(TARGETS.items()):
     ymax = YMAX[target_name]
