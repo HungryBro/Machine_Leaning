@@ -6,18 +6,18 @@
 python3 HW4.py
 ```
 
-โปรแกรมจะรันครบ 4 ข้อ สร้างกราฟ และบันทึกผลไว้ในโฟลเดอร์ `output/` โดยอัตโนมัติ
+ค่าเริ่มต้นรันครบ 4 ข้อ และสร้างกราฟ likelihood, posterior และ decision boundary ลงในโฟลเดอร์ `output/`
 
-| ข้อ | กรณี | ตัวจำแนก | สิ่งที่กราฟแสดง |
-|---:|---|---|---|
-| 1 | Gaussian 1 ตัวแปร, variance สองคลาสเท่ากัน | Single Threshold | likelihood, posterior, threshold/decision regions |
-| 2 | Gaussian 1 ตัวแปร, variance สองคลาสไม่เท่ากัน | Quadratic / Double Threshold | likelihood, posterior, 0-2 thresholds |
-| 3 | Gaussian 2 ตัวแปร, covariance ต่างกัน | QDA | likelihood contours, posterior, quadratic decision curve |
-| 4 | Gaussian 2 ตัวแปร, covariance ร่วมกัน | LDA | likelihood contours, posterior, linear decision line |
+| ข้อ | ชุดคำสั่งในโค้ด | ขอบตัดสินใจ |
+|---:|---|---|
+| 1 | `equal_1d`: Gaussian 1D, variance เท่ากัน | single threshold |
+| 2 | `unequal_1d`: Gaussian 1D, variance ไม่เท่ากัน | quadratic; อาจมี 0-2 thresholds |
+| 3 | `qda_2d`: covariance ต่างกัน | QDA, เส้นโค้ง |
+| 4 | `lda_2d`: covariance เดียวกัน | LDA, เส้นตรง |
 
-## ปรับค่าอย่างไร
+## ปรับค่าตรงไหน
 
-ไม่ต้องใส่ options ต่อท้ายคำสั่งรัน ให้แก้ไขเฉพาะส่วน **SETTINGS: ปรับค่าตรงนี้** ที่ด้านบนของ `HW4.py` แล้วรันคำสั่งเดิมอีกครั้ง
+แก้เฉพาะส่วน **SETTINGS** ด้านบนของ [HW4.py](HW4.py) แล้วรันคำสั่งเดิมอีกครั้ง ไม่ต้องใช้ command options
 
 ```python
 SCENARIO_TO_RUN = "all"
@@ -25,106 +25,54 @@ PARAMETER_MODE = "manual"
 N_SAMPLES = 120
 RANDOM_SEED = 42
 PRIOR_C0 = 0.50
-
-MU_C0 = None
-MU_C1 = None
-SIGMA_C0 = None
-SIGMA_C1 = None
-COV_C0 = None
-COV_C1 = None
-
 RUN_SENSITIVITY_DEMO = True
 ```
 
-### ความหมายของตัวแปรตั้งค่า
+- `SCENARIO_TO_RUN`: เลือก `"all"`, `"equal_1d"`, `"unequal_1d"`, `"qda_2d"` หรือ `"lda_2d"`
+- `PARAMETER_MODE`: `"manual"` ใช้ค่าที่กำหนด; `"estimate"` สุ่มข้อมูล `N_SAMPLES` จุด แล้ว estimate mean, covariance และ prior ด้วย MLE
+- `PRIOR_C0`: prior ของ C0 โดย prior ของ C1 คือ `1 - PRIOR_C0`
+- `RUN_SENSITIVITY_DEMO`: `True` จะสร้างกราฟทดลองผลของ `n`, `μ`, `σ` และ prior เพิ่ม; ตั้งเป็น `False` หากต้องการเฉพาะกราฟหลัก
 
-| ตัวแปร | ความหมาย |
-|---|---|
-| `SCENARIO_TO_RUN` | `"all"` เพื่อรันครบทุกข้อ หรือเลือก `"equal_1d"`, `"unequal_1d"`, `"qda_2d"`, `"lda_2d"` |
-| `PARAMETER_MODE` | `"manual"` ใช้พารามิเตอร์ที่กำหนดเอง; `"estimate"` สุ่มข้อมูลแล้ว estimate พารามิเตอร์แบบ MLE |
-| `N_SAMPLES` | จำนวนตัวอย่างที่สุ่มในโหมด `estimate` |
-| `PRIOR_C0` | Prior \(P(C_0)\); ส่วน \(P(C_1)=1-P(C_0)\) |
-| `MU_C0, MU_C1` | ค่าเฉลี่ยของ C0 และ C1 |
-| `SIGMA_C0, SIGMA_C1` | ส่วนเบี่ยงเบนมาตรฐานของกรณี 1D |
-| `COV_C0, COV_C1` | covariance ของกรณี 2D |
-| `RUN_SENSITIVITY_DEMO` | `True` สร้างกราฟทดลองปรับค่าเพิ่ม; `False` สร้างเฉพาะกรณีที่เลือก |
+## ปรับ μ, σ และ covariance
 
-หากค่า mean หรือ covariance เป็น `None` โปรแกรมจะใช้ค่าตั้งต้นที่ตั้งใจให้เห็น decision boundary ชัดเจน
+### กรณี 1D
 
-## ตัวอย่างการทดลอง
+แก้ใน `ONE_D_PARAMETERS`:
 
-### 1) ดูผลของจำนวนตัวอย่าง n
+```python
+"equal_1d":   {"mu": [-1.5, 1.5], "sigma": [1.0, 1.0]},
+"unequal_1d": {"mu": [-1.0, 1.0], "sigma": [0.55, 1.80]},
+```
 
-แก้ SETTINGS เป็น:
+เช่น หากต้องการทดสอบ mean ใกล้กัน:
 
 ```python
 SCENARIO_TO_RUN = "equal_1d"
-PARAMETER_MODE = "estimate"
-N_SAMPLES = 20
+ONE_D_PARAMETERS["equal_1d"]["mu"] = [-0.5, 0.5]
 RUN_SENSITIVITY_DEMO = False
 ```
 
-รันหนึ่งครั้ง จากนั้นเปลี่ยน `N_SAMPLES = 500` แล้วรันซ้ำ จะเห็นว่า parameter ที่ estimate และตำแหน่ง threshold นิ่งขึ้นเมื่อจำนวนข้อมูลมากขึ้น
+หรือปรับ `N_SAMPLES = 20` แล้วเลือก `PARAMETER_MODE = "estimate"` เพื่อดูความแปรปรวนของ parameter ที่ estimate เมื่อมีข้อมูลน้อย
 
-### 2) ดูผลของค่าเฉลี่ย μ
+### กรณี 2D
+
+แก้ใน `TWO_D_PARAMETERS`:
 
 ```python
-SCENARIO_TO_RUN = "equal_1d"
-PARAMETER_MODE = "manual"
-MU_C0 = "-0.5"
-MU_C1 = "0.5"
-SIGMA_C0 = 1.0
-SIGMA_C1 = 1.0
-RUN_SENSITIVITY_DEMO = False
+"qda_2d": {
+    "mu": [[-1.2, -0.8], [1.1, 0.9]],
+    "cov": [[[1.25, 0.55], [0.55, 0.80]],
+            [[0.65, -0.35], [-0.35, 1.40]]],
+},
 ```
 
-ค่า mean ที่ใกล้กันทำให้ likelihood ซ้อนทับมากและ accuracy ลดลง ลองเปลี่ยนเป็น `MU_C0 = "-2.0"` กับ `MU_C1 = "2.0"` แล้วรันอีกครั้งเพื่อเปรียบเทียบ
+`mu` แถวแรกคือ C0 และแถวที่สองคือ C1 ส่วน `cov` มี covariance matrix ของ C0 และ C1 ตามลำดับ
 
-### 3) ดูผลของ σ
+สำหรับ LDA ให้ covariance ทั้งสอง matrix เท่ากันเสมอ
 
-```python
-SCENARIO_TO_RUN = "unequal_1d"
-PARAMETER_MODE = "manual"
-MU_C0 = "-1.0"
-MU_C1 = "1.0"
-SIGMA_C0 = 0.55
-SIGMA_C1 = 1.80
-RUN_SENSITIVITY_DEMO = False
-```
+## สูตรหลัก
 
-เมื่อ sigma ไม่เท่ากัน decision boundary อาจมี 0, 1 หรือ 2 thresholds ตามพารามิเตอร์
-
-### 4) ดูผลของ prior ใน LDA
-
-```python
-SCENARIO_TO_RUN = "lda_2d"
-PARAMETER_MODE = "manual"
-PRIOR_C0 = 0.80
-RUN_SENSITIVITY_DEMO = False
-```
-
-decision region ของ C0 จะขยาย และเส้น boundary จะเลื่อนไปทาง C1 ซึ่งมี prior น้อยกว่า
-
-### 5) กำหนด mean/covariance ของ QDA แบบ 2D
-
-```python
-SCENARIO_TO_RUN = "qda_2d"
-MU_C0 = "-1.4,-0.8"
-MU_C1 = "1.0,1.2"
-COV_C0 = "1.2,0.5,0.5,0.8"
-COV_C1 = "0.6,-0.3,-0.3,1.5"
-RUN_SENSITIVITY_DEMO = False
-```
-
-covariance 2D ใช้รูปแบบ `"a,b,c,d"` ซึ่งหมายถึง
-
-\[
-\begin{bmatrix}a&b\\c&d\end{bmatrix}.
-\]
-
-## สูตรที่ใช้
-
-สำหรับแต่ละคลาส \(C_k\) ใช้ Gaussian likelihood:
+ใช้ Gaussian likelihood:
 
 \[
 p(\mathbf{x}\mid C_k)=
@@ -140,7 +88,4 @@ P(C_k\mid\mathbf{x})=
 {\sum_j p(\mathbf{x}\mid C_j)P(C_j)}.
 \]
 
-- ข้อ 1: variance เท่ากัน จึงมี single threshold
-- ข้อ 2: variance ไม่เท่ากัน จึงเป็น quadratic และอาจได้ two thresholds
-- ข้อ 3: covariance ต่างกัน จึงเป็น QDA ที่ boundary เป็นเส้นโค้ง
-- ข้อ 4: covariance เดียวกัน จึงเป็น LDA ที่ boundary เป็นเส้นตรง
+โปรแกรมตัดสินเป็นคลาสที่มี posterior สูงกว่า
