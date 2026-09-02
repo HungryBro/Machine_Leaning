@@ -16,7 +16,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import os
 from pathlib import Path
-from typing import Iterable, Union
+from typing import Iterable, Optional, Union
 
 # เก็บ font cache ชั่วคราวนอกโฟลเดอร์งาน จึงไม่ใช่ไฟล์ที่ต้องส่ง
 os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib-hw4-cache")
@@ -90,12 +90,12 @@ class RunSettings:
     n: int
     seed: int
     prior0: float
-    mu0: str | None
-    mu1: str | None
-    sigma0: float | None
-    sigma1: float | None
-    cov0: str | None
-    cov1: str | None
+    mu0: Optional[str]
+    mu1: Optional[str]
+    sigma0: Optional[float]
+    sigma1: Optional[float]
+    cov0: Optional[str]
+    cov1: Optional[str]
     demo: bool
 
 
