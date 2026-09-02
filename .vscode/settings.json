@@ -1,0 +1,18 @@
+{
+  "python.analysis.extraPaths": [
+    "Assignment/Week3",
+    "Assignment/Week4",
+    "./Assignment/Week3",
+    "./Assignment/Week4",
+    "/Users/dolphin/Desktop/Machine_Learning/Assignment/Week3",
+    "/Users/dolphin/Desktop/Machine_Learning/Assignment/Week4"
+  ],
+  "python.autoComplete.extraPaths": [
+    "Assignment/Week3",
+    "Assignment/Week4",
+    "./Assignment/Week3",
+    "./Assignment/Week4",
+    "/Users/dolphin/Desktop/Machine_Learning/Assignment/Week3",
+    "/Users/dolphin/Desktop/Machine_Learning/Assignment/Week4"
+  ]
+}

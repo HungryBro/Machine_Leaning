@@ -1,79 +1,396 @@
 {
-  "directed": false,
-  "multigraph": false,
-  "graph": {
-    "hyperedges": [
-      {
-        "id": "week3_bias_variance_experiment",
-        "label": "Week 3 Bias-Variance Experiment",
-        "nodes": [
-          "sin_pi_x_target",
-          "x_squared_target",
-          "constant_model",
-          "linear_model",
-          "linear_through_origin_model",
-          "bias_squared_metric",
-          "variance_metric",
-          "expected_out_error"
-        ],
-        "relation": "form",
-        "confidence": "EXTRACTED",
-        "confidence_score": 1.0,
-        "source_file": "Assignment/Week3/README.md"
-      },
-      {
-        "id": "week3_learning_curve_rendering_flow",
-        "label": "Learning-Curve Rendering Flow",
-        "nodes": [
-          "learning_curve_playground",
-          "html_curve_for_function",
-          "html_render_lc_curve_function",
-          "learning_curves",
-          "expected_out_error"
-        ],
-        "relation": "implement",
-        "confidence": "EXTRACTED",
-        "confidence_score": 1.0,
-        "source_file": "Assignment/Week3/index.html"
-      }
-    ]
-  },
   "nodes": [
     {
+      "id": "bias_variance_lab_compact_py",
       "label": "bias_variance_lab_compact.py",
       "file_type": "code",
       "source_file": "bias_variance_lab_compact.py",
-      "source_location": "L1",
-      "id": "bias_variance_lab_compact_py",
-      "community": 10,
-      "norm_label": "bias_variance_lab_compact.py"
+      "source_location": "L1"
     },
     {
+      "id": "week3_bias_variance_lab_compact_fit_predict",
       "label": "fit_predict()",
       "file_type": "code",
       "source_file": "bias_variance_lab_compact.py",
-      "source_location": "L21",
-      "id": "week3_bias_variance_lab_compact_fit_predict",
-      "community": 10,
-      "norm_label": "fit_predict()"
+      "source_location": "L28"
     },
     {
+      "id": "week3_bias_variance_lab_compact_simulate",
       "label": "simulate()",
       "file_type": "code",
       "source_file": "bias_variance_lab_compact.py",
-      "source_location": "L31",
-      "id": "week3_bias_variance_lab_compact_simulate",
-      "community": 10,
-      "norm_label": "simulate()"
+      "source_location": "L45"
     },
     {
+      "id": "week3_bias_variance_lab_compact_learning_curve",
       "label": "learning_curve()",
       "file_type": "code",
       "source_file": "bias_variance_lab_compact.py",
-      "source_location": "L44",
-      "id": "week3_bias_variance_lab_compact_learning_curve",
-      "community": 10,
-      "norm_label": "learning_curve()"
+      "source_location": "L66"
+    },
+    {
+      "id": "week3_bias_variance_lab_compact_expected_eout",
+      "label": "expected_eout()",
+      "file_type": "code",
+      "source_file": "bias_variance_lab_compact.py",
+      "source_location": "L89"
+    },
+    {
+      "id": "week3_bias_variance_lab_compact_main",
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "bias_variance_lab_compact.py",
+      "source_location": "L95"
+    },
+    {
+      "id": "bias_variance_lab_compact_comment_py",
+      "label": "bias_variance_lab_compact_comment.py",
+      "file_type": "code",
+      "source_file": "bias_variance_lab_compact_comment.py",
+      "source_location": "L1"
+    },
+    {
+      "id": "week3_bias_variance_lab_compact_comment_fit_predict",
+      "label": "fit_predict()",
+      "file_type": "code",
+      "source_file": "bias_variance_lab_compact_comment.py",
+      "source_location": "L54"
+    },
+    {
+      "id": "week3_bias_variance_lab_compact_comment_simulate",
+      "label": "simulate()",
+      "file_type": "code",
+      "source_file": "bias_variance_lab_compact_comment.py",
+      "source_location": "L78"
+    },
+    {
+      "id": "week3_bias_variance_lab_compact_comment_learning_curve",
+      "label": "learning_curve()",
+      "file_type": "code",
+      "source_file": "bias_variance_lab_compact_comment.py",
+      "source_location": "L108"
+    },
+    {
+      "id": "slide_create_slides_week3_py",
+      "label": "create_slides_week3.py",
+      "file_type": "code",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L1"
+    },
+    {
+      "id": "slide_create_slides_week3_rgb",
+      "label": "rgb()",
+      "file_type": "code",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L28"
+    },
+    {
+      "id": "slide_create_slides_week3_set_font",
+      "label": "set_font()",
+      "file_type": "code",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L47"
+    },
+    {
+      "id": "slide_create_slides_week3_add_text",
+      "label": "add_text()",
+      "file_type": "code",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L54"
+    },
+    {
+      "id": "slide_create_slides_week3_add_rect",
+      "label": "add_rect()",
+      "file_type": "code",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L73"
+    },
+    {
+      "id": "slide_create_slides_week3_add_footer",
+      "label": "add_footer()",
+      "file_type": "code",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L86"
+    },
+    {
+      "id": "slide_create_slides_week3_add_header",
+      "label": "add_header()",
+      "file_type": "code",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L94"
+    },
+    {
+      "id": "slide_create_slides_week3_add_card",
+      "label": "add_card()",
+      "file_type": "code",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L108"
+    },
+    {
+      "id": "slide_create_slides_week3_add_bullets",
+      "label": "add_bullets()",
+      "file_type": "code",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L118"
+    },
+    {
+      "id": "slide_create_slides_week3_add_contained_image",
+      "label": "add_contained_image()",
+      "file_type": "code",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L135"
+    },
+    {
+      "id": "slide_create_slides_week3_add_title_slide",
+      "label": "add_title_slide()",
+      "file_type": "code",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L153"
+    },
+    {
+      "id": "slide_create_slides_week3_add_setup_slide",
+      "label": "add_setup_slide()",
+      "file_type": "code",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L175"
+    },
+    {
+      "id": "slide_create_slides_week3_add_concept_slide",
+      "label": "add_concept_slide()",
+      "file_type": "code",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L192"
+    },
+    {
+      "id": "slide_create_slides_week3_add_results_slide",
+      "label": "add_results_slide()",
+      "file_type": "code",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L222"
+    },
+    {
+      "id": "slide_create_slides_week3_add_image_slide",
+      "label": "add_image_slide()",
+      "file_type": "code",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L273"
+    },
+    {
+      "id": "slide_create_slides_week3_add_summary_slide",
+      "label": "add_summary_slide()",
+      "file_type": "code",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L283"
+    },
+    {
+      "id": "slide_create_slides_week3_build_deck",
+      "label": "build_deck()",
+      "file_type": "code",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L298"
+    },
+    {
+      "id": "slide_create_slides_week3_rationale_1",
+      "label": "สร้างสไลด์ภาษาไทยสำหรับ Bias–Variance Lab.  รันจากโฟลเดอร์ใดก็ได้:     python3 A",
+      "file_type": "rationale",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L1"
+    },
+    {
+      "id": "slide_create_slides_week3_rationale_136",
+      "label": "วางภาพในกรอบโดยรักษา aspect ratio และจัดกึ่งกลางเสมอ.",
+      "file_type": "rationale",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L136"
+    },
+    {
+      "id": "readme_md",
+      "label": "README.md",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "week3_readme_week_3_bias_variance_decomposition_learning_curves",
+      "label": "Week 3 — Bias-Variance Decomposition & Learning Curves",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "week3_readme_โจทย_ท_ได_ร_บ",
+      "label": "โจทย์ที่ได้รับ",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L3"
+    },
+    {
+      "id": "week3_readme_ฟ_งก_ช_นเป_าหมาย_target_functions",
+      "label": "ฟังก์ชันเป้าหมาย (Target Functions)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L11"
+    },
+    {
+      "id": "week3_readme_ส_งท_ต_องท_า",
+      "label": "สิ่งที่ต้องทำ",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L15"
+    },
+    {
+      "id": "week3_readme_ทฤษฎ_ส_าค_ญ",
+      "label": "ทฤษฎีสำคัญ",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L24"
+    },
+    {
+      "id": "week3_readme_bias_variance_decomposition",
+      "label": "Bias-Variance Decomposition",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L26"
+    },
+    {
+      "id": "week3_readme_codeblock_1",
+      "label": "code:block1 (E_D[E_out(g_D)] = E_x[bias(x)² + var(x)] + σ²)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L30"
+    },
+    {
+      "id": "week3_readme_expected_value_บนช_วง_1_1",
+      "label": "Expected Value บนช่วง `[-1, 1]`",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L41"
+    },
+    {
+      "id": "week3_readme_codeblock_2",
+      "label": "code:block2 (E_x[h(x)] = ∫_{-1}^{1} h(x) · (1/2) dx)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L45"
+    },
+    {
+      "id": "week3_readme_ว_ธ_การค_านวณ",
+      "label": "วิธีการคำนวณ",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L53"
+    },
+    {
+      "id": "week3_readme_1_analytical_method",
+      "label": "1. Analytical Method",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L55"
+    },
+    {
+      "id": "week3_readme_2_simulation_method",
+      "label": "2. Simulation Method",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L69"
+    },
+    {
+      "id": "week3_readme_3_learning_curve",
+      "label": "3. Learning Curve",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L76"
+    },
+    {
+      "id": "week3_readme_ผลล_พธ_n_2",
+      "label": "ผลลัพธ์ (N = 2)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L84"
+    },
+    {
+      "id": "week3_readme_target_f_x_sin_πx",
+      "label": "Target: `f(x) = sin(πx)`",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L86"
+    },
+    {
+      "id": "week3_readme_target_f_x_x2",
+      "label": "Target: `f(x) = x²`",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L94"
+    },
+    {
+      "id": "week3_readme_ข_อส_งเกต",
+      "label": "ข้อสังเกต",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L102"
+    },
+    {
+      "id": "week3_readme_ไฟล_ภาพ_plots",
+      "label": "ไฟล์ภาพ (Plots)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L111"
+    },
+    {
+      "id": "week3_readme_1_plots_average_fit_png",
+      "label": "1. `plots/average_fit.png`",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L113"
+    },
+    {
+      "id": "week3_readme_2_plots_learning_curve_sinpix_png",
+      "label": "2. `plots/learning_curve_sinpix.png`",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L127"
+    },
+    {
+      "id": "week3_readme_3_plots_learning_curve_x2_png",
+      "label": "3. `plots/learning_curve_x2.png`",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L139"
+    },
+    {
+      "id": "week3_readme_ว_ธ_ร_นโค_ด",
+      "label": "วิธีรันโค้ด",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L150"
+    },
+    {
+      "id": "week3_readme_codeblock_3",
+      "label": "code:bash (cd \"/Users/dolphin/Desktop/Machine_Learning/Assignment/Week3)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L152"
+    },
+    {
+      "id": "week3_readme_โครงสร_างโฟลเดอร",
+      "label": "โครงสร้างโฟลเดอร์",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L166"
+    },
+    {
+      "id": "week3_readme_codeblock_4",
+      "label": "code:block4 (Assignment/Week3/)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L168"
+    },
+    {
+      "id": "week3_readme_อ_างอ_ง",
+      "label": "อ้างอิง",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L182"
     },
     {
       "label": "results.json",
@@ -580,67 +897,67 @@
       "norm_label": "learning_curve()"
     },
     {
-      "label": "Bias-Variance Decomposition Lab ================================ \u0e42\u0e08\u0e17\u0e22\u0e4c: \u0e2b\u0e32\u0e04\u0e48\u0e32\u0e04\u0e27\u0e32",
+      "label": "Bias-Variance Decomposition Lab ================================ โจทย์: หาค่าควา",
       "file_type": "rationale",
       "source_file": "bias_variance_lab.py",
       "source_location": "L1",
       "id": "week3_bias_variance_lab_rationale_1",
       "community": 1,
-      "norm_label": "bias-variance decomposition lab ================================ \u0e42\u0e08\u0e17\u0e22\u0e4c: \u0e2b\u0e32\u0e04\u0e32\u0e04\u0e27\u0e32"
+      "norm_label": "bias-variance decomposition lab ================================ โจทย์: หาคาควา"
     },
     {
-      "label": "\u0e41\u0e1b\u0e25\u0e07\u0e0a\u0e37\u0e48\u0e2d target \u0e43\u0e2b\u0e49\u0e40\u0e1b\u0e47\u0e19\u0e0a\u0e37\u0e48\u0e2d\u0e44\u0e1f\u0e25\u0e4c\u0e17\u0e35\u0e48\u0e1b\u0e25\u0e2d\u0e14\u0e20\u0e31\u0e22\u0e17\u0e31\u0e49\u0e07\u0e1a\u0e19 Windows/Linux/Mac.",
+      "label": "แปลงชื่อ target ให้เป็นชื่อไฟล์ที่ปลอดภัยทั้งบน Windows/Linux/Mac.",
       "file_type": "rationale",
       "source_file": "bias_variance_lab.py",
       "source_location": "L36",
       "id": "week3_bias_variance_lab_rationale_36",
       "community": 1,
-      "norm_label": "\u0e41\u0e1b\u0e25\u0e07\u0e0a\u0e37\u0e2d target \u0e43\u0e2b\u0e40\u0e1b\u0e47\u0e19\u0e0a\u0e37\u0e2d\u0e44\u0e1f\u0e25\u0e4c\u0e17\u0e35\u0e1b\u0e25\u0e2d\u0e14\u0e20\u0e31\u0e22\u0e17\u0e31\u0e07\u0e1a\u0e19 windows/linux/mac."
+      "norm_label": "แปลงชือ target ใหเป็นชือไฟล์ทีปลอดภัยทังบน windows/linux/mac."
     },
     {
-      "label": "fit \u0e40\u0e2a\u0e49\u0e19\u0e15\u0e23\u0e07\u0e1c\u0e48\u0e32\u0e19 2 \u0e08\u0e38\u0e14 \u0e23\u0e2d\u0e07\u0e23\u0e31\u0e1a input \u0e17\u0e31\u0e49\u0e07 scalar \u0e41\u0e25\u0e30 array",
+      "label": "fit เส้นตรงผ่าน 2 จุด รองรับ input ทั้ง scalar และ array",
       "file_type": "rationale",
       "source_file": "bias_variance_lab.py",
       "source_location": "L112",
       "id": "week3_bias_variance_lab_rationale_112",
       "community": 1,
-      "norm_label": "fit \u0e40\u0e2a\u0e19\u0e15\u0e23\u0e07\u0e1c\u0e32\u0e19 2 \u0e08\u0e14 \u0e23\u0e2d\u0e07\u0e23\u0e31\u0e1a input \u0e17\u0e31\u0e07 scalar \u0e41\u0e25\u0e30 array"
+      "norm_label": "fit เสนตรงผาน 2 จด รองรับ input ทัง scalar และ array"
     },
     {
-      "label": "\u0e2b\u0e32\u0e04\u0e48\u0e32 bias\u00b2 \u0e41\u0e25\u0e30 variance \u0e02\u0e2d\u0e07 constant model \u0e41\u0e1a\u0e1a analytical     \u0e43\u0e0a\u0e49 numerical int",
+      "label": "หาค่า bias² และ variance ของ constant model แบบ analytical     ใช้ numerical int",
       "file_type": "rationale",
       "source_file": "bias_variance_lab.py",
       "source_location": "L136",
       "id": "week3_bias_variance_lab_rationale_136",
       "community": 1,
-      "norm_label": "\u0e2b\u0e32\u0e04\u0e32 bias2 \u0e41\u0e25\u0e30 variance \u0e02\u0e2d\u0e07 constant model \u0e41\u0e1a\u0e1a analytical     \u0e43\u0e0a numerical int"
+      "norm_label": "หาคา bias2 และ variance ของ constant model แบบ analytical     ใช numerical int"
     },
     {
-      "label": "\u0e2b\u0e32\u0e04\u0e48\u0e32 bias\u00b2 \u0e41\u0e25\u0e30 variance \u0e41\u0e1a\u0e1a numerical integration \u0e40\u0e2b\u0e19\u0e37\u0e2d x1, x2     \u0e43\u0e0a\u0e49 Monte Ca",
+      "label": "หาค่า bias² และ variance แบบ numerical integration เหนือ x1, x2     ใช้ Monte Ca",
       "file_type": "rationale",
       "source_file": "bias_variance_lab.py",
       "source_location": "L164",
       "id": "week3_bias_variance_lab_rationale_164",
       "community": 1,
-      "norm_label": "\u0e2b\u0e32\u0e04\u0e32 bias2 \u0e41\u0e25\u0e30 variance \u0e41\u0e1a\u0e1a numerical integration \u0e40\u0e2b\u0e19\u0e37\u0e2d x1, x2     \u0e43\u0e0a monte ca"
+      "norm_label": "หาคา bias2 และ variance แบบ numerical integration เหนือ x1, x2     ใช monte ca"
     },
     {
-      "label": "Monte Carlo estimate \u0e02\u0e2d\u0e07 bias\u00b2 \u0e41\u0e25\u0e30 variance     n_samples  = 2:      \u0e02\u0e19\u0e32\u0e14\u0e0a\u0e38\u0e14 tra",
+      "label": "Monte Carlo estimate ของ bias² และ variance     n_samples  = 2:      ขนาดชุด tra",
       "file_type": "rationale",
       "source_file": "bias_variance_lab.py",
       "source_location": "L211",
       "id": "week3_bias_variance_lab_rationale_211",
       "community": 1,
-      "norm_label": "monte carlo estimate \u0e02\u0e2d\u0e07 bias2 \u0e41\u0e25\u0e30 variance     n_samples  = 2:      \u0e02\u0e19\u0e32\u0e14\u0e0a\u0e14 tra"
+      "norm_label": "monte carlo estimate ของ bias2 และ variance     n_samples  = 2:      ขนาดชด tra"
     },
     {
-      "label": "\u0e04\u0e37\u0e19\u0e04\u0e48\u0e32 Ein \u0e41\u0e25\u0e30 Eout \u0e40\u0e09\u0e25\u0e35\u0e48\u0e22\u0e2a\u0e33\u0e2b\u0e23\u0e31\u0e1a\u0e41\u0e15\u0e48\u0e25\u0e30 n     n_datasets = 3,000: \u0e08\u0e33\u0e19\u0e27\u0e19\u0e0a\u0e38\u0e14\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e40\u0e09",
+      "label": "คืนค่า Ein และ Eout เฉลี่ยสำหรับแต่ละ n     n_datasets = 3,000: จำนวนชุดข้อมูลเฉ",
       "file_type": "rationale",
       "source_file": "bias_variance_lab.py",
       "source_location": "L245",
       "id": "week3_bias_variance_lab_rationale_245",
       "community": 1,
-      "norm_label": "\u0e04\u0e37\u0e19\u0e04\u0e32 ein \u0e41\u0e25\u0e30 eout \u0e40\u0e09\u0e25\u0e35\u0e22\u0e2a\u0e4d\u0e32\u0e2b\u0e23\u0e31\u0e1a\u0e41\u0e15\u0e25\u0e30 n     n_datasets = 3,000: \u0e08\u0e4d\u0e32\u0e19\u0e27\u0e19\u0e0a\u0e14\u0e02\u0e2d\u0e21\u0e25\u0e40\u0e09"
+      "norm_label": "คืนคา ein และ eout เฉลียสําหรับแตละ n     n_datasets = 3,000: จํานวนชดขอมลเฉ"
     },
     {
       "label": "create_slides.py",
@@ -1355,7 +1672,1112 @@
       "norm_label": "learning-curve results dataset"
     }
   ],
+  "hyperedges": [
+    {
+      "id": "week3_bias_variance_experiment",
+      "label": "Week 3 Bias-Variance Experiment",
+      "nodes": [
+        "sin_pi_x_target",
+        "x_squared_target",
+        "constant_model",
+        "linear_model",
+        "linear_through_origin_model",
+        "bias_squared_metric",
+        "variance_metric",
+        "expected_out_error"
+      ],
+      "relation": "form",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assignment/Week3/README.md"
+    },
+    {
+      "id": "week3_learning_curve_rendering_flow",
+      "label": "Learning-Curve Rendering Flow",
+      "nodes": [
+        "learning_curve_playground",
+        "html_curve_for_function",
+        "html_render_lc_curve_function",
+        "learning_curves",
+        "expected_out_error"
+      ],
+      "relation": "implement",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "Assignment/Week3/index.html"
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0,
   "links": [
+    {
+      "source": "bias_variance_lab_compact_py",
+      "target": "os",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact.py",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "bias_variance_lab_compact_py",
+      "target": "numpy",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact.py",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "bias_variance_lab_compact_py",
+      "target": "matplotlib",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact.py",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "bias_variance_lab_compact_py",
+      "target": "matplotlib_pyplot",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact.py",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "bias_variance_lab_compact_py",
+      "target": "week3_bias_variance_lab_compact_fit_predict",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact.py",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "bias_variance_lab_compact_py",
+      "target": "week3_bias_variance_lab_compact_simulate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact.py",
+      "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "bias_variance_lab_compact_py",
+      "target": "week3_bias_variance_lab_compact_learning_curve",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact.py",
+      "source_location": "L66",
+      "weight": 1.0
+    },
+    {
+      "source": "bias_variance_lab_compact_py",
+      "target": "week3_bias_variance_lab_compact_expected_eout",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact.py",
+      "source_location": "L89",
+      "weight": 1.0
+    },
+    {
+      "source": "bias_variance_lab_compact_py",
+      "target": "week3_bias_variance_lab_compact_main",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact.py",
+      "source_location": "L95",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_bias_variance_lab_compact_simulate",
+      "target": "week3_bias_variance_lab_compact_fit_predict",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact.py",
+      "source_location": "L52",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_bias_variance_lab_compact_learning_curve",
+      "target": "week3_bias_variance_lab_compact_fit_predict",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact.py",
+      "source_location": "L78",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_bias_variance_lab_compact_expected_eout",
+      "target": "week3_bias_variance_lab_compact_fit_predict",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact.py",
+      "source_location": "L90",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_bias_variance_lab_compact_main",
+      "target": "week3_bias_variance_lab_compact_simulate",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact.py",
+      "source_location": "L109",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_bias_variance_lab_compact_main",
+      "target": "week3_bias_variance_lab_compact_fit_predict",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact.py",
+      "source_location": "L121",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_bias_variance_lab_compact_main",
+      "target": "week3_bias_variance_lab_compact_learning_curve",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact.py",
+      "source_location": "L139",
+      "weight": 1.0
+    },
+    {
+      "source": "bias_variance_lab_compact_comment_py",
+      "target": "os",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact_comment.py",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "bias_variance_lab_compact_comment_py",
+      "target": "numpy",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact_comment.py",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "bias_variance_lab_compact_comment_py",
+      "target": "matplotlib",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact_comment.py",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "bias_variance_lab_compact_comment_py",
+      "target": "matplotlib_pyplot",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact_comment.py",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "bias_variance_lab_compact_comment_py",
+      "target": "week3_bias_variance_lab_compact_comment_fit_predict",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact_comment.py",
+      "source_location": "L54",
+      "weight": 1.0
+    },
+    {
+      "source": "bias_variance_lab_compact_comment_py",
+      "target": "week3_bias_variance_lab_compact_comment_simulate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact_comment.py",
+      "source_location": "L78",
+      "weight": 1.0
+    },
+    {
+      "source": "bias_variance_lab_compact_comment_py",
+      "target": "week3_bias_variance_lab_compact_comment_learning_curve",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact_comment.py",
+      "source_location": "L108",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_bias_variance_lab_compact_comment_simulate",
+      "target": "week3_bias_variance_lab_compact_comment_fit_predict",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact_comment.py",
+      "source_location": "L90",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_bias_variance_lab_compact_comment_learning_curve",
+      "target": "week3_bias_variance_lab_compact_comment_fit_predict",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "bias_variance_lab_compact_comment.py",
+      "source_location": "L128",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_py",
+      "target": "pathlib",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_py",
+      "target": "pil",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_py",
+      "target": "pptx",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_py",
+      "target": "pptx_dml_color",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_py",
+      "target": "pptx_enum_shapes",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_py",
+      "target": "pptx_enum_text",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_py",
+      "target": "pptx_util",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_py",
+      "target": "slide_create_slides_week3_rgb",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_py",
+      "target": "slide_create_slides_week3_set_font",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L47",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_py",
+      "target": "slide_create_slides_week3_add_text",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L54",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_py",
+      "target": "slide_create_slides_week3_add_rect",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L73",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_py",
+      "target": "slide_create_slides_week3_add_footer",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L86",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_py",
+      "target": "slide_create_slides_week3_add_header",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L94",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_py",
+      "target": "slide_create_slides_week3_add_card",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L108",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_py",
+      "target": "slide_create_slides_week3_add_bullets",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L118",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_py",
+      "target": "slide_create_slides_week3_add_contained_image",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L135",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_py",
+      "target": "slide_create_slides_week3_add_title_slide",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L153",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_py",
+      "target": "slide_create_slides_week3_add_setup_slide",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L175",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_py",
+      "target": "slide_create_slides_week3_add_concept_slide",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L192",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_py",
+      "target": "slide_create_slides_week3_add_results_slide",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L222",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_py",
+      "target": "slide_create_slides_week3_add_image_slide",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L273",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_py",
+      "target": "slide_create_slides_week3_add_summary_slide",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L283",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_py",
+      "target": "slide_create_slides_week3_build_deck",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L298",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_text",
+      "target": "slide_create_slides_week3_set_font",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L69",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_footer",
+      "target": "slide_create_slides_week3_add_rect",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L87",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_footer",
+      "target": "slide_create_slides_week3_rgb",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L87",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_footer",
+      "target": "slide_create_slides_week3_add_text",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L88",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_header",
+      "target": "slide_create_slides_week3_add_rect",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L95",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_header",
+      "target": "slide_create_slides_week3_add_text",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L98",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_card",
+      "target": "slide_create_slides_week3_add_rect",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L110",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_card",
+      "target": "slide_create_slides_week3_add_text",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L112",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_bullets",
+      "target": "slide_create_slides_week3_set_font",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L131",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_title_slide",
+      "target": "slide_create_slides_week3_add_rect",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L155",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_title_slide",
+      "target": "slide_create_slides_week3_add_text",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L157",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_setup_slide",
+      "target": "slide_create_slides_week3_add_header",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L177",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_setup_slide",
+      "target": "slide_create_slides_week3_add_text",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L178",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_setup_slide",
+      "target": "slide_create_slides_week3_add_card",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L182",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_setup_slide",
+      "target": "slide_create_slides_week3_add_footer",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L188",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_concept_slide",
+      "target": "slide_create_slides_week3_add_header",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L194",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_concept_slide",
+      "target": "slide_create_slides_week3_add_rect",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L195",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_concept_slide",
+      "target": "slide_create_slides_week3_add_text",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L196",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_concept_slide",
+      "target": "slide_create_slides_week3_rgb",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L200",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_concept_slide",
+      "target": "slide_create_slides_week3_add_footer",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L218",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_results_slide",
+      "target": "slide_create_slides_week3_add_header",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L224",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_results_slide",
+      "target": "slide_create_slides_week3_add_text",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L225",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_results_slide",
+      "target": "slide_create_slides_week3_rgb",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L261",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_results_slide",
+      "target": "slide_create_slides_week3_add_rect",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L265",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_image_slide",
+      "target": "slide_create_slides_week3_add_header",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L275",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_image_slide",
+      "target": "slide_create_slides_week3_add_contained_image",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L276",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_image_slide",
+      "target": "slide_create_slides_week3_add_text",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L277",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_image_slide",
+      "target": "slide_create_slides_week3_add_footer",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L279",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_summary_slide",
+      "target": "slide_create_slides_week3_add_header",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L285",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_summary_slide",
+      "target": "slide_create_slides_week3_add_card",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L286",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_summary_slide",
+      "target": "slide_create_slides_week3_add_rect",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L289",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_summary_slide",
+      "target": "slide_create_slides_week3_add_text",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L290",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_add_summary_slide",
+      "target": "slide_create_slides_week3_add_footer",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L294",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_build_deck",
+      "target": "slide_create_slides_week3_add_title_slide",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L302",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_build_deck",
+      "target": "slide_create_slides_week3_add_concept_slide",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L303",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_build_deck",
+      "target": "slide_create_slides_week3_add_results_slide",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L304",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_build_deck",
+      "target": "slide_create_slides_week3_add_image_slide",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L314",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_rationale_1",
+      "target": "slide_create_slides_week3_py",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "slide_create_slides_week3_rationale_136",
+      "target": "slide_create_slides_week3_add_contained_image",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "Slide/create_slides_week3.py",
+      "source_location": "L136",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_md",
+      "target": "week3_readme_week_3_bias_variance_decomposition_learning_curves",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_week_3_bias_variance_decomposition_learning_curves",
+      "target": "week3_readme_โจทย_ท_ได_ร_บ",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_โจทย_ท_ได_ร_บ",
+      "target": "week3_readme_ฟ_งก_ช_นเป_าหมาย_target_functions",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_โจทย_ท_ได_ร_บ",
+      "target": "week3_readme_ส_งท_ต_องท_า",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_week_3_bias_variance_decomposition_learning_curves",
+      "target": "week3_readme_ทฤษฎ_ส_าค_ญ",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_ทฤษฎ_ส_าค_ญ",
+      "target": "week3_readme_bias_variance_decomposition",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_bias_variance_decomposition",
+      "target": "week3_readme_codeblock_1",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_ทฤษฎ_ส_าค_ญ",
+      "target": "week3_readme_expected_value_บนช_วง_1_1",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L41",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_expected_value_บนช_วง_1_1",
+      "target": "week3_readme_codeblock_2",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_week_3_bias_variance_decomposition_learning_curves",
+      "target": "week3_readme_ว_ธ_การค_านวณ",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L53",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_ว_ธ_การค_านวณ",
+      "target": "week3_readme_1_analytical_method",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L55",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_ว_ธ_การค_านวณ",
+      "target": "week3_readme_2_simulation_method",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L69",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_ว_ธ_การค_านวณ",
+      "target": "week3_readme_3_learning_curve",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L76",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_week_3_bias_variance_decomposition_learning_curves",
+      "target": "week3_readme_ผลล_พธ_n_2",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L84",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_ผลล_พธ_n_2",
+      "target": "week3_readme_target_f_x_sin_πx",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L86",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_ผลล_พธ_n_2",
+      "target": "week3_readme_target_f_x_x2",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L94",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_ผลล_พธ_n_2",
+      "target": "week3_readme_ข_อส_งเกต",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L102",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_week_3_bias_variance_decomposition_learning_curves",
+      "target": "week3_readme_ไฟล_ภาพ_plots",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L111",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_ไฟล_ภาพ_plots",
+      "target": "week3_readme_1_plots_average_fit_png",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L113",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_ไฟล_ภาพ_plots",
+      "target": "week3_readme_2_plots_learning_curve_sinpix_png",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L127",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_ไฟล_ภาพ_plots",
+      "target": "week3_readme_3_plots_learning_curve_x2_png",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L139",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_week_3_bias_variance_decomposition_learning_curves",
+      "target": "week3_readme_ว_ธ_ร_นโค_ด",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L150",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_ว_ธ_ร_นโค_ด",
+      "target": "week3_readme_codeblock_3",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L152",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_week_3_bias_variance_decomposition_learning_curves",
+      "target": "week3_readme_โครงสร_างโฟลเดอร",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L166",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_โครงสร_างโฟลเดอร",
+      "target": "week3_readme_codeblock_4",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L168",
+      "weight": 1.0
+    },
+    {
+      "source": "week3_readme_week_3_bias_variance_decomposition_learning_curves",
+      "target": "week3_readme_อ_างอ_ง",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L182",
+      "weight": 1.0
+    },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
@@ -3334,41 +4756,5 @@
       "source": "html_render_lc_curve_function",
       "target": "html_curve_for_function"
     }
-  ],
-  "hyperedges": [
-    {
-      "id": "week3_bias_variance_experiment",
-      "label": "Week 3 Bias-Variance Experiment",
-      "nodes": [
-        "sin_pi_x_target",
-        "x_squared_target",
-        "constant_model",
-        "linear_model",
-        "linear_through_origin_model",
-        "bias_squared_metric",
-        "variance_metric",
-        "expected_out_error"
-      ],
-      "relation": "form",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "Assignment/Week3/README.md"
-    },
-    {
-      "id": "week3_learning_curve_rendering_flow",
-      "label": "Learning-Curve Rendering Flow",
-      "nodes": [
-        "learning_curve_playground",
-        "html_curve_for_function",
-        "html_render_lc_curve_function",
-        "learning_curves",
-        "expected_out_error"
-      ],
-      "relation": "implement",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "Assignment/Week3/index.html"
-    }
-  ],
-  "built_at_commit": "1cd1de4ef313e2eacf9ff110e62b5da5b81846ba"
+  ]
 }

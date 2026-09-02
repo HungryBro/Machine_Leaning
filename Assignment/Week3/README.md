@@ -1,185 +1,139 @@
-# Week 3 — Bias-Variance Decomposition & Learning Curves
+# Week 3 — Bias–Variance Decomposition และ Learning Curves
 
-## โจทย์ที่ได้รับ
+โค้ดชุดนี้ศึกษาความสัมพันธ์ระหว่าง **bias²**, **variance**, **noise** และ **Eout** โดยเปรียบเทียบโมเดล 3 แบบกับฟังก์ชันเป้าหมาย 2 แบบ
 
-จงหาค่าความเอนเอียง (bias²) และความแปรปรวน (variance) ด้วย **analytical method** และ **simulation** สำหรับ:
+## 1. โจทย์และโมเดล
 
-1. **แบบจำลองค่าคงที่** (Constant): `h(x) = b`
-2. **แบบจำลองเชิงเส้น** (Linear): `h(x) = w₀ + w₁x`
-3. **แบบจำลองเชิงเส้นผ่านจุดกำเนิด** (Linear through origin): `h(x) = wx`
+ข้อมูลฝึกสุ่มจาก \`x ~ Uniform[-1, 1]\` และใช้โมเดลต่อไปนี้:
 
-### ฟังก์ชันเป้าหมาย (Target Functions)
-1. `f(x) = sin(πx)` — สุ่มข้อมูลจาก Uniform[-1, 1] จำนวน 2 ตัวอย่าง
-2. `f(x) = x²` — สุ่มข้อมูลจาก Uniform[-1, 1] จำนวน 2 ตัวอย่าง
+\`\`\`text
+Constant                  g(x) = w0
+Linear                    g(x) = w0 + w1 x
+Linear through origin     g(x) = w1 x
+\`\`\`
 
-### สิ่งที่ต้องทำ
-1. คำนวณ **bias²** และ **variance** ด้วยวิธี **analytical** และ **simulation**
-2. เปรียบเทียบผลระหว่างโมเดลทั้ง 3 บนทั้ง 2 ฟังก์ชันเป้าหมาย
-3. สร้าง **Learning Curve** แสดง `E_in` และ `E_out` เมื่อจำนวนตัวอย่าง `n` เปลี่ยนไป
-4. ทดลองเพิ่ม **สัญญาณรบกวน (noise)** ที่ระดับ `σ = 0.0, 0.1, 0.3`
-5. ใช้ **Normal Equation** (`numpy.linalg.lstsq`) ในการ fit โมเดล ไม่ใช้ Gradient Descent
+ฟังก์ชันเป้าหมายคือ:
 
----
+\`\`\`text
+f(x) = sin(πx)
+f(x) = x²
+\`\`\`
 
-## ทฤษฎีสำคัญ
+การ fit ใช้ \`numpy.linalg.lstsq\` ซึ่งให้ผลเทียบเท่าการแก้ least squares/normal equation แต่มีเสถียรภาพกว่าการสร้าง inverse โดยตรง
 
-### Bias-Variance Decomposition
+## 2. สูตรที่ใช้
 
-สำหรับโมเดล `g_D(x)` ที่ฝึกจากชุดข้อมูล `D` ค่าคลาดเคลื่อนนอกตัวอย่างเฉลี่ยสามารถแยกได้เป็น:
+สำหรับข้อมูลฝึกชุดหนึ่ง \`D\` โมเดลที่ fit ได้คือ \`g_D(x)\` และโมเดลเฉลี่ยคือ:
 
-```
-E_D[E_out(g_D)] = E_x[bias(x)² + var(x)] + σ²
-```
+\`\`\`text
+ḡ(x) = E_D[g_D(x)]
+\`\`\`
 
-โดย:
+Bias–variance decomposition ที่ใช้ในงานนี้คือ:
 
-- **แบบจำลองเฉลี่ย (average hypothesis)**: `ḡ(x) = E_D[g_D(x)]`
-- **bias²(x)**: `(ḡ(x) − f(x))²` — ความห่างของโมเดลเฉลี่ยจากเป้าหมายจริง
-- **var(x)**: `E_D[(g_D(x) − ḡ(x))²]` — ความกว้างหรือความแกว่งของแบบจำลองจากชุดข้อมูลต่างกัน
-- **σ²**: noise variance (irreducible error)
+\`\`\`text
+Eout = Bias² + Variance + σ²
+\`\`\`
 
-### Expected Value บนช่วง `[-1, 1]`
+โดยคำนวณบน \`x ~ Uniform[-1, 1]\` ดังนั้น:
 
-เนื่องจาก `x ~ Uniform[-1, 1]` ความหนาแน่นคือ `p(x) = 1/2` ดังนั้น:
+\`\`\`text
+E_x[h(x)] = (1/2) ∫[-1,1] h(x) dx
+\`\`\`
 
-```
-E_x[h(x)] = ∫_{-1}^{1} h(x) · (1/2) dx
-```
+และ:
 
-ส่วน `E_D[·]` คือค่าคาดหมายเหนือชุดข้อมูล `D = {(x₁, f(x₁)), (x₂, f(x₂))}` ที่สุ่มมา
+\`\`\`text
+Bias²    = E_x[(ḡ(x) − f(x))²]
+Variance = E_x[E_D[(g_D(x) − ḡ(x))²]]
+\`\`\`
 
----
+## 3. Analytical และ Simulation
 
-## วิธีการคำนวณ
+### Analytical / numerical integration
 
-### 1. Analytical Method
+ฟังก์ชัน \`analytical_bias_variance()\` ใช้กริดและ numerical integration ด้วย trapezoidal rule:
 
-- **Constant model**: คำนวณแบบปิดสมบูรณ์ได้โดยตรงจาก `E[f]` และ `E[f²]` แล้วใช้ trapezoidal rule ประมาณค่าอินทิเกรต
-  - `ḡ(x) = E[f]`
-  - `bias² = E_x[(ḡ − f)²]`
-  - `variance = 0.5 · (E[f²] − E[f]²)` สำหรับ `n = 2`
+- สร้างกริด test บน \`[-1, 1]\` จำนวน \`q = 401\` จุด
+- พิจารณาคู่ข้อมูลฝึก \`(x₁, x₂)\` บนกริดเดียวกัน
+- fit โมเดลแต่ละคู่ข้อมูล แล้วหา \`ḡ(x)\` และ variance
+- อินทิเกรต bias² และ variance ตามการแจกแจง Uniform
+- Constant model ใช้ค่าคาดหมายแบบปิด ส่วน Linear และ Linear through origin ใช้การอินทิเกรตเชิงตัวเลข
 
-- **Linear / Linear through origin**: ใช้ numerical integration โดย:
-  - สร้างกริด `x` บน `[-1, 1]`
-  - สุ่มชุดข้อมูล `(x₁, x₂)` จำนวนมาก
-  - คำนวณ `g_D(x)` สำหรับทุก `x` และทุกชุดข้อมูล
-  - หา `ḡ(x)` และ `E_D[g_D(x)²]` จากค่าเฉลี่ย Monte Carlo
-  - อินทิเกรต `bias²(x)` และ `var(x)` บน `x` ด้วย trapezoidal rule
+### Simulation
 
-### 2. Simulation Method
+ฟังก์ชัน \`simulate()\` สุ่มข้อมูลฝึก \`n = 2\` จำนวน **50,000 ชุด** แล้ว fit โมเดลบนแต่ละชุด จากนั้นคำนวณ bias², variance และ Eout จากค่าทำนายบน test grid
 
-- สุ่มชุดข้อมูลจำนวนมาก (Monte Carlo)
-- fit โมเดลบนแต่ละชุด
-- ทำนายบนกริด test points
-- คำนวณ `ḡ(x)`, `bias²`, และ `variance` โดยตรงจากตัวอย่าง
+ค่า simulation ไม่จำเป็นต้องเท่ากับ analytical ทุกหลัก เพราะ simulation เป็นการประมาณจากจำนวนชุดข้อมูลจำกัด แต่ควรใกล้เคียงกัน
 
-### 3. Learning Curve
+## 4. ผลลัพธ์หลักเมื่อ n = 2 และ σ = 0
 
-- ทดลองกับ `n = [2, 3, 4, 5, 7, 10, 15, 20, 30, 50, 100]`
-- สำหรับแต่ละ `n` สุ่มหลายชุดข้อมูล แล้วหา `E_in` (MSE บนชุดฝึก) และ `E_out` (MSE บน test set)
-- ทดลองกับ noise `σ = 0.0, 0.1, 0.3` โดยเพิ่ม `ε ~ N(0, σ²)` เข้าไปใน `y`
+### Target: \`sin(πx)\`
 
----
+| Model | Bias² (ana) | Variance (ana) | Eout (ana) | Eout (sim) |
+|---|---:|---:|---:|---:|
+| Constant | 0.5000 | 0.2500 | 0.7500 | 0.7483 |
+| Linear | 0.2067 | 1.6763 | 1.8830 | 1.8835 |
+| Linear through origin | 0.2706 | 0.2366 | 0.5072 | 0.5135 |
 
-## ผลลัพธ์ (N = 2)
+Linear มี bias ต่ำแต่ variance สูงมาก ส่วน Linear through origin มี Eout ต่ำสุดในชุดการทดลองนี้
 
-### Target: `f(x) = sin(πx)`
+### Target: \`x²\`
 
-| Model | bias² (ana) | variance (ana) | Eout (ana) | Eout (sim) |
-|-------|------------:|---------------:|-----------:|-----------:|
-| Constant | 0.5000 | 0.2500 | 0.7500 | 0.7495 |
-| Linear | 0.2060 | 1.6703 | 1.8763 | 1.8878 |
-| Linear through origin | 0.2718 | 0.2372 | 0.5090 | 0.5083 |
+| Model | Bias² (ana) | Variance (ana) | Eout (ana) | Eout (sim) |
+|---|---:|---:|---:|---:|
+| Constant | 0.0889 | 0.0444 | 0.1333 | 0.1346 |
+| Linear | 0.2000 | 0.3333 | 0.5333 | 0.5342 |
+| Linear through origin | 0.2000 | 0.1149 | 0.3149 | 0.3185 |
 
-### Target: `f(x) = x²`
+Constant มี Eout ต่ำสุด เพราะ \`x²\` มีค่าเฉลี่ยคงที่และสมมาตรรอบศูนย์ ขณะที่เส้นตรงไม่สามารถแทนรูปพาราโบลาได้ดี
 
-| Model | bias² (ana) | variance (ana) | Eout (ana) | Eout (sim) |
-|-------|------------:|---------------:|-----------:|-----------:|
-| Constant | 0.0889 | 0.0444 | 0.1333 | 0.1341 |
-| Linear | 0.1998 | 0.3318 | 0.5315 | 0.5352 |
-| Linear through origin | 0.2000 | 0.1147 | 0.3147 | 0.3182 |
+## 5. Learning curve และ noise
 
-### ข้อสังเกต
+Learning curve ทดลอง \`n = [2, 3, 4, 5, 7, 10, 15, 20, 30, 50, 100]\` และ noise 3 ระดับ:
 
-- **Constant model กับ `sin(πx)`**: bias² = 0.5, variance = 0.25 ตรงกับค่าในสไลด์ (`E[f] = 0`, `E[f²] = 0.5`)
-- **Linear model กับ `sin(πx)`**: bias² ต่ำ (~0.21) แต่ variance สูงมาก (~1.67) สอดคล้องกับที่อาจารย์สอนไว้ว่า linear regression บนข้อมูล 2 จุดมี variance สูง
-- **Linear through origin**: มักให้ variance ต่ำกว่า Linear ธรรมดา เพราะมีพารามิเตอร์น้อยกว่า แต่ bias² สูงกว่าเนื่องจากถูกบังคับผ่าน `(0, 0)`
-- **Constant model กับ `x²`**: ทำงานได้ดีกว่าที่คาด (Eout ต่ำสุด) เพราะ `x²` สมมาตรบน `[-1, 1]` ค่าเฉลี่ยคงที่ `E[x²] = 1/3` ใกล้เคียงกับฟังก์ชันจริงเมื่อเฉลี่ยทั้งช่วง
+\`\`\`text
+σ = 0.0, 0.1, 0.3
+y = f(x) + ε,    ε ~ Normal(0, σ²)
+\`\`\`
 
----
+ในกราฟ:
 
-## ไฟล์ภาพ (Plots)
+- \`Ein\` คือ MSE บนข้อมูลฝึก
+- \`Eout\` คือค่า error บนข้อมูลใหม่ โดยคำนวณ signal error และบวก \`σ²\`
+- เมื่อ \`n\` เพิ่ม variance มักลดลงและค่าประมาณนิ่งขึ้น
+- เมื่อ \`σ\` เพิ่ม Eout จะสูงขึ้น เพราะมี irreducible noise เพิ่ม
 
-### 1. `plots/average_fit.png`
+## 6. ไฟล์ผลลัพธ์
 
-ภาพรวม 2 × 3 แสดง:
-- **แถวบน**: target `sin(πx)`
-- **แถวล่าง**: target `x²`
-- **คอลัมน์**: Constant, Linear, Linear through origin
-
-ในแต่ละกราฟ:
-- **เส้นเขียว**: ฟังก์ชันเป้าหมาย `f(x)`
-- **เส้นประแดง**: `ḡ(x)` จาก simulation (แบบจำลองเฉลี่ย)
-- **เส้นสีเทาบาง ๆ**: ตัวอย่าง hypothesis จากชุดข้อมูลสุ่ม 20 ชุด แสดงให้เห็นความแปรปรวนของแบบจำลอง
-
-**สิ่งที่เห็นได้ชัด**: Linear model มีเส้นสีเทากระจายกว้างมาก (variance สูง) โดยเฉพาะกับ `sin(πx)` ในขณะที่ Constant model มีเส้นที่ค่อนข้างแน่น
-
-### 2. `plots/learning_curve_sinpix.png`
-
-Learning curve ของ `sin(πx)` แยกเป็น 3 กราฟตามโมเดล แสดง:
-- **Ein** (เส้นประ): ค่าคลาดเคลื่อนบนชุดฝึก
-- **Eout** (เส้นทึบ): ค่าคลาดเคลื่อนบนข้อมูลใหม่
-- สีต่าง ๆ แทนระดับ noise `σ = 0.0, 0.1, 0.3`
-
-**สิ่งที่สังเกต**:
-- ที่ `n = 2` Linear model มี `Ein ≈ 0` เพราะเส้นตรงผ่าน 2 จุดพอดี
-- แต่ `Eout` ของ Linear สูงมากเมื่อ `n` น้อยและมี noise สูง (overfit)
-- เมื่อ `n` เพิ่ม `Ein` และ `Eout` ลู่เข้าหากัน
-
-### 3. `plots/learning_curve_x2.png`
-
-Learning curve ของ `x²` ในรูปแบบเดียวกัน
-
-**สิ่งที่สังเกต**:
-- Constant model มี `Eout` ต่ำมากตั้งแต่ `n` น้อย สอดคล้องกับผล bias-variance
-- Linear model มี `Eout` สูงช่วง `n` น้อยเมื่อมี noise เนื่องจาก variance สูง
-- Linear through origin มีพฤติกรรมระหว่าง Constant และ Linear
-
----
-
-## วิธีรันโค้ด
-
-```bash
-cd "/Users/dolphin/Desktop/Machine_Learning/Assignment/Week3"
-python3 bias_variance_lab.py
-```
-
-ความต้องการ:
-- Python 3
-- `numpy`
-- `matplotlib`
-
-ไม่จำเป็นต้องติดตั้ง `scipy` เพราะใช้ numerical integration ด้วย `numpy` อย่างเดียว
-
----
-
-## โครงสร้างโฟลเดอร์
-
-```
-Assignment/Week3/
-├── bias_variance_lab.py    # โค้ดหลัก
-├── index.html              # interactive playground
-├── README.md               # คู่มือและอธิบายผลลัพธ์
-├── results.json            # ค่าตัวเลขที่คำนวณได้
+\`\`\`text
+Week3/
+├── bias_variance_lab_compact.py          # โค้ดหลัก
+├── bias_variance_lab_compact_comment.py  # wrapper สำหรับรันแบบสั้น
+├── README.md
+├── Slide/
+│   ├── create_slides_week3.py
+│   └── slides_Week3.pptx
 └── plots/
     ├── average_fit.png
-    ├── learning_curve_sinpix.png
-    └── learning_curve_x2.png
-```
+    └── learning_curve.png
+\`\`\`
 
----
+\`average_fit.png\` แสดง target, โมเดลเฉลี่ย และการกระจายของโมเดลจากชุดข้อมูลต่าง ๆ ส่วน \`learning_curve.png\` แสดง \`Ein\` และ \`Eout\` ของทั้ง 3 โมเดลสำหรับ noise ทั้ง 3 ระดับ
 
-## อ้างอิง
+## 7. วิธีรัน
 
-- สไลด์ Week 3: `Generalization.pdf`
-- Wikipedia: Expected value — https://en.wikipedia.org/wiki/Expected_value
+รันจากโฟลเดอร์โปรเจกต์:
+
+\`\`\`bash
+cd "/Users/dolphin/Desktop/Machine_Learning"
+python3 Assignment/Week3/bias_variance_lab_compact.py
+\`\`\`
+
+ถ้าต้องการสร้างสไลด์ใหม่หลังจากรันโค้ด:
+
+\`\`\`bash
+python3 Assignment/Week3/Slide/create_slides_week3.py
+\`\`\`
+
+Dependencies: \`numpy\`, \`matplotlib\`, \`python-pptx\`, \`Pillow\`

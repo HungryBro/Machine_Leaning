@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 5 — Polynomial Degree Selection & Overfitting</title>
+<style>
+:root{
+  --bg:#ffffff;--panel:#ffffff;--panel2:#f6fafd;--ink:#142333;--muted:#526477;
+  --cyan:#087ea4;--blue:#2563eb;--orange:#b45309;--green:#15803d;--red:#c2414c;
+  --line:#d7e2ec;--shadow:0 12px 32px rgba(31,70,95,.10)
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#ffffff;
+  color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.topbar{position:fixed;z-index:20;left:0;right:0;top:0;height:58px;padding:0 4vw;display:flex;align-items:center;
+  justify-content:space-between;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.brand{font-weight:800;letter-spacing:.02em;color:var(--cyan)}
+.counter{color:var(--muted);font-variant-numeric:tabular-nums}
+.deck{padding-top:0}
+.slide{min-height:0;padding:5.5rem 7vw;display:flex;flex-direction:column;justify-content:flex-start;
+  border-bottom:0;position:relative;scroll-margin-top:58px;background:#ffffff}
+.slide:nth-child(even){background:#ffffff}
+.eyebrow{color:var(--cyan);font-size:.86rem;text-transform:uppercase;letter-spacing:.16em;font-weight:800;margin-bottom:1rem}
+h1{font-size:clamp(2.5rem,6vw,6rem);line-height:1.02;max-width:1050px;margin:.1em 0 .25em;color:#102234}
+h2{font-size:clamp(1.8rem,3.3vw,3.2rem);line-height:1.08;margin:0 0 1rem;color:#102234}
+h3{color:var(--cyan);margin:.2rem 0 .7rem}
+p,li{font-size:clamp(1rem,1.42vw,1.3rem);line-height:1.65}
+.lead{max-width:950px;color:var(--muted);font-size:clamp(1.1rem,2vw,1.55rem)}
+.small{font-size:.9rem;color:var(--muted);line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.2rem}
+.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.card{background:#ffffff;border:1px solid var(--line);border-radius:18px;padding:1.25rem 1.4rem;box-shadow:var(--shadow)}
+.card.accent{border-color:#8ad9e8;background:#effbfe}
+.card.warn{border-color:#edc28e;background:#fffaf1}
+.card.good{border-color:#9bd8b0;background:#f1fbf4}
+.card.bad{border-color:#e6a0a7;background:#fff5f5}
+.pill{display:inline-block;border:1px solid var(--line);padding:.35rem .7rem;border-radius:999px;color:var(--muted);margin:.2rem .25rem .2rem 0;font-size:.92rem}
+.math{font-family:Georgia,"Times New Roman",serif;color:#142333;font-size:1.18em}
+.formula{font-family:Georgia,"Times New Roman",serif;color:#fff;font-size:clamp(1.15rem,2vw,1.65rem);padding:1rem 1.2rem;
+  background:#f3f8fb;border:1px solid #d7e8ef;border-left:4px solid var(--cyan);border-radius:10px;margin:1rem 0;overflow:auto;color:#142333}
+.callout{padding:1rem 1.2rem;border-radius:12px;background:#effbfe;border:1px solid #b9e8f0;color:#173b4c}
+.callout strong{color:var(--cyan)}
+.two-col{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);gap:1.5rem;align-items:center}
+.graph{width:100%;border-radius:14px;border:1px solid var(--line);background:#fff;box-shadow:var(--shadow)}
+.graph.tall{max-height:66vh;object-fit:contain}
+.caption{font-size:.92rem;color:var(--muted);margin-top:.5rem}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.87rem}
+th,td{padding:.56rem .65rem;border-bottom:1px solid var(--line);text-align:right}
+th{color:#05647f;background:#eaf6fb;position:sticky;top:0}
+td:first-child,th:first-child{text-align:left}
+tbody tr:hover{background:rgba(117,167,255,.08)}
+.table-wrap{max-height:58vh;overflow:auto;border:1px solid var(--line);border-radius:12px}
+code,pre{font-family:"SFMono-Regular",Consolas,monospace}
+pre{white-space:pre-wrap;background:#f3f6f9;border:1px solid var(--line);padding:1rem;border-radius:12px;color:#17344c;line-height:1.55}
+.kpi{font-size:2rem;font-weight:850;color:var(--cyan);line-height:1.1}
+.kpi-label{color:var(--muted);margin-top:.4rem}
+.muted{color:var(--muted)}
+.good-text{color:var(--green)}.warn-text{color:var(--orange)}.bad-text{color:var(--red)}
+ol.steps{counter-reset:step;list-style:none;padding:0;margin:0}
+ol.steps li{counter-increment:step;display:flex;gap:1rem;margin:1rem 0}
+ol.steps li::before{content:counter(step);flex:none;width:2rem;height:2rem;border-radius:50%;display:grid;place-items:center;
+  background:var(--cyan);color:#061321;font-weight:900}
+.footer{position:absolute;bottom:1.4rem;left:7vw;right:7vw;display:flex;justify-content:space-between;color:#6f89a5;font-size:.78rem}
+.footer{display:none}
+.controls{position:fixed;z-index:30;right:1.2rem;bottom:1.1rem;display:flex;gap:.45rem}
+.controls{display:none}
+.controls button{border:1px solid var(--line);background:#ffffff;color:var(--ink);border-radius:10px;padding:.6rem .8rem;cursor:pointer;box-shadow:0 5px 16px rgba(31,70,95,.10)}
+.controls button:hover{border-color:var(--cyan);color:var(--cyan)}
+.note{font-size:.82rem;color:#85a3be}
+@media(max-width:850px){
+  .grid,.grid.three,.two-col{grid-template-columns:1fr}
+  .slide{padding:5vh 5vw 9vh}
+  .footer{left:5vw;right:5vw}
+  table{font-size:.75rem}
+  th,td{padding:.4rem}
+}
+@media print{
+  .topbar,.controls{display:none}.deck{padding-top:0}.slide{page-break-after:always}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">WEEK 5 / MACHINE LEARNING</div>
+</header>
+
+<main class="deck">
+
+<section class="slide" id="s1">
+  <div class="eyebrow">Assignment presentation · simulation study</div>
+  <h1>การเลือกดีกรีพหุนาม<br><span style="color:var(--cyan)">และพฤติกรรม Overfitting</span></h1>
+  <p class="lead">ศึกษาด้วยข้อมูลจำลอง เมื่อเป้าหมายคือ <span class="math">sin(πx)</span> และเปรียบเทียบ Training error, k-fold CV และ True Eout</p>
+  <div class="grid three" style="margin-top:2rem">
+    <div class="card accent"><div class="kpi">d = 0…8</div><div class="kpi-label">โมเดลพหุนามทุกดีกรี</div></div>
+    <div class="card good"><div class="kpi">n = 10…80</div><div class="kpi-label">ทดลองขนาดข้อมูลหลายระดับ</div></div>
+    <div class="card warn"><div class="kpi">σ = 0, .3, .6</div><div class="kpi-label">ดูผลของสัญญาณรบกวน</div></div>
+  </div>
+  <p class="note" style="margin-top:2rem">ไฟล์นี้ใช้กราฟจาก <code>Assignment/Week5/plots/</code> และผลจาก <code>results/</code> เท่านั้น ไม่รวมภาพคำนวณมือจาก <code>visual_guides/</code></p>
+  <div class="footer"><span>Week 5</span><span>กด ← → เพื่อเปลี่ยนสไลด์</span></div>
+</section>
+
+<section class="slide" id="s2">
+  <div class="eyebrow">คำถามของงาน</div>
+  <h2>เราต้องการตอบอะไร?</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>คำถามหลัก</h3>
+      <ul>
+        <li>ดีกรีสูงทำให้ Training error ลดลงเสมอหรือไม่?</li>
+        <li>CV เลือกดีกรีเดียวกับ True Eout หรือไม่?</li>
+        <li>เมื่อเพิ่ม n หรือ σ พฤติกรรมจะเปลี่ยนอย่างไร?</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>สัญญาณของ Overfitting</h3>
+      <ul>
+        <li><span class="bad-text">Ein ต่ำมาก</span> แต่ Ecv/Eout สูง</li>
+        <li>กราฟแกว่งตาม noise มากกว่าตาม sin(πx)</li>
+        <li>ค่าสัมประสิทธิ์ <span class="math">|w|</span> โตผิดปกติ</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:1.4rem"><strong>แนวคิดสำคัญ:</strong> Training error วัดการจำข้อมูลเดิม ส่วน CV พยายามจำลองการทำนายข้อมูลที่โมเดลยังไม่เคยเห็น</div>
+  <div class="footer"><span>คำถามวิจัย</span><span>2</span></div>
+</section>
+
+<section class="slide" id="s3">
+  <div class="eyebrow">Experimental setup</div>
+  <h2>กำหนดปัญหาและสร้างข้อมูล</h2>
+  <div class="grid">
+    <div class="card accent">
+      <h3>Target function</h3>
+      <div class="formula">f(x) = sin(πx), &nbsp; x ∈ [−1, 1]</div>
+      <p class="small">สุ่มตัวแปร x จาก Uniform(−1,1) แล้วสร้างค่า y จากฟังก์ชันเป้าหมาย</p>
+    </div>
+    <div class="card warn">
+      <h3>Noisy observation</h3>
+      <div class="formula">yᵢ = sin(πxᵢ) + εᵢ<br>εᵢ ~ N(0, σ²)</div>
+      <p class="small">เมื่อ σ = 0 จะเป็น noiseless และเมื่อ σ เพิ่ม จุดข้อมูลจะกระจายออกจากเส้นเป้าหมายมากขึ้น</p>
+    </div>
+  </div>
+  <div class="grid three" style="margin-top:1.2rem">
+    <div class="card"><b>n</b><br><span class="pill">10</span><span class="pill">20</span><span class="pill">40</span><span class="pill">80</span></div>
+    <div class="card"><b>degree</b><br><span class="pill">0 ถึง 8</span></div>
+    <div class="card"><b>CV</b><br><span class="pill">10-fold</span></div>
+  </div>
+  <div class="card" style="margin-top:1.2rem">
+    <h3>10-fold CV แบ่งข้อมูลเป็น Train/Test อย่างไร?</h3>
+    <p class="small">แบ่งข้อมูลเป็น 10 ส่วนเท่า ๆ กัน ในแต่ละรอบใช้ 9 folds เป็น train และ 1 fold เป็น test แล้ววนจนครบ 10 รอบ ดังนั้นข้อมูลทุกจุดจะถูกใช้เป็น test exactly 1 ครั้ง</p>
+    <table>
+      <thead><tr><th>จำนวนข้อมูล n</th><th>Train ต่อรอบ (9 folds)</th><th>Test ต่อรอบ (1 fold)</th><th>จำนวนรอบ</th></tr></thead>
+      <tbody>
+        <tr><td>10</td><td>9</td><td>1</td><td>10</td></tr>
+        <tr><td>20</td><td>18</td><td>2</td><td>10</td></tr>
+        <tr><td>40</td><td>36</td><td>4</td><td>10</td></tr>
+        <tr><td>80</td><td>72</td><td>8</td><td>10</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="footer"><span>ข้อมูลจำลอง</span><span>3</span></div>
+</section>
+
+<section class="slide" id="s4">
+  <div class="eyebrow">Model</div>
+  <h2>พหุนามดีกรี d ในรูปเมทริกซ์</h2>
+  <div class="formula">ŷ(x) = w₀ + w₁x + w₂x² + … + wᵈxᵈ</div>
+  <div class="two-col">
+    <div>
+      <p>สำหรับข้อมูลหนึ่งจุด เวกเตอร์คุณลักษณะคือ</p>
+      <div class="formula">ϕ(x) = [1, x, x², …, xᵈ]</div>
+      <p>เมื่อนำทุกจุดมาเรียงเป็นแถว จะได้ Design matrix <span class="math">X</span> ขนาด <span class="math">n × (d+1)</span></p>
+    </div>
+    <div class="card">
+      <h3>ตัวอย่าง d = 3</h3>
+      <div class="formula">ϕ(x) = [1, x, x², x³]</div>
+      <p class="small">จึงต้องหา w ทั้งหมด 4 ค่า ได้แก่ w₀ ถึง w₃</p>
+    </div>
+  </div>
+  <div class="callout"><strong>ข้อสังเกต:</strong> ดีกรีเพิ่ม = จำนวนพารามิเตอร์เพิ่ม = ความยืดหยุ่นเพิ่ม แต่ก็มีโอกาสไวต่อ noise มากขึ้น</div>
+  <div class="footer"><span>Polynomial regression</span><span>4</span></div>
+</section>
+
+<section class="slide" id="s5">
+  <div class="eyebrow">Hand formula → code</div>
+  <h2>สูตรที่ใช้คำนวณในโค้ดเหมือนการคำนวณมือ</h2>
+  <div class="formula">w = (XᵀX)⁻¹Xᵀy</div>
+  <ol class="steps">
+    <li>สร้าง X = [1, x, x², …, xᵈ] จากค่า x ทุกจุด</li>
+    <li>คำนวณเมทริกซ์ XᵀX และเวกเตอร์ Xᵀy</li>
+    <li>แก้ระบบสมการ (XᵀX)w = Xᵀy เพื่อหา w</li>
+    <li>นำ w ไปคำนวณ ŷ ทุกจุด แล้วหาค่า MSE</li>
+  </ol>
+  <div class="grid" style="margin-top:1rem">
+    <div class="card"><h3>ใน Week5/HW3.py</h3><p class="small">ฟังก์ชัน <code>design()</code>, <code>fit()</code>, <code>predict()</code> ทำตามลำดับนี้</p></div>
+    <div class="card"><h3>การใช้ Week3–4</h3><p class="small">นำ <code>sin_target</code>, <code>reference_data</code> จาก Week3 และ <code>gen_data</code> จาก Week4 มาใช้ซ้ำ</p></div>
+  </div>
+  <div class="footer"><span>วิธีคำนวณ</span><span>5</span></div>
+</section>
+
+<section class="slide" id="s6">
+  <div class="eyebrow">Error definitions</div>
+  <h2>ค่าคลาดเคลื่อน 3 แบบที่ต้องแยกให้ออก</h2>
+  <div class="grid three">
+    <div class="card">
+      <h3>Training / Ein</h3>
+      <div class="formula">Eᵢₙ = (1/n) Σ(yᵢ − ŷᵢ)²</div>
+      <p class="small">ฟิตและวัดบนข้อมูลชุดเดียวกัน จึงมีแนวโน้มลดลงเมื่อ d เพิ่ม</p>
+    </div>
+    <div class="card accent">
+      <h3>Cross-validation / Ecv</h3>
+      <div class="formula">Ecv = (1/n) Σ(yᵢ − ŷᵢ₍₋fold₎)²</div>
+      <p class="small">10 รอบ: รอบละ train 90% และ test 10%; แต่ละจุดถูกทำนายโดยโมเดลที่ไม่ได้ใช้จุดนั้นในการฟิต แล้วรวม squared error ของ test ทั้ง n จุด</p>
+    </div>
+    <div class="card good">
+      <h3>True Eout</h3>
+      <div class="formula">Eout ≈ grid-MSE + σ²</div>
+      <p class="small">วัดกับ sin(πx) บนกริดละเอียด แล้วบวก noise variance ของ label</p>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:1.3rem"><strong>หมายเหตุ:</strong> Eout ในงานนี้คือค่าประมาณของ error ของโมเดลที่ฟิตได้บนข้อมูลชุดนั้น ไม่ใช่ค่าเฉลี่ยเชิงทฤษฎีของทุกชุดข้อมูล</div>
+  <div class="footer"><span>Metrics</span><span>6</span></div>
+</section>
+
+<section class="slide" id="s7">
+  <div class="eyebrow">Reproducibility</div>
+  <h2>การทำให้ผลเปรียบเทียบได้</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>ข้อมูลจาก CSV</h3>
+      <p>ใช้ไฟล์ใน <code>sin experiment/</code> โดยตรง เพื่อให้เทียบกับผลที่กรอกมาจาก Weka ได้</p>
+      <p class="small">Noiseless ใช้คอลัมน์ y ส่วน noisy ใช้คอลัมน์ noisy_y</p>
+    </div>
+    <div class="card">
+      <h3>Weka-like folds</h3>
+      <p>ใช้ลำดับการสลับข้อมูลแบบ Java Random seed = 1 ก่อนแบ่ง 10 folds</p>
+      <p class="small">ค่าจาก Weka ไม่ได้ถูก hard-code ในโค้ด แต่คำนวณใหม่จากสูตร</p>
+    </div>
+  </div>
+  <div class="grid three" style="margin-top:1.2rem">
+    <div class="card"><div class="kpi">MSE</div><div class="kpi-label">กราฟ simulation ใช้ MSE</div></div>
+    <div class="card"><div class="kpi">RMSE</div><div class="kpi-label">ตาราง CSV comparison แสดงเพิ่มเพื่อเทียบ Weka</div></div>
+    <div class="card"><div class="kpi">seed</div><div class="kpi-label">ทำให้ทดลองซ้ำได้</div></div>
+  </div>
+  <div class="note" style="margin-top:1rem">ภาพจาก visual_guides ไม่ได้ถูกใส่ไว้ใน presentation นี้</div>
+  <div class="footer"><span>การเทียบกับ Weka</span><span>7</span></div>
+</section>
+
+<section class="slide" id="s8">
+  <div class="eyebrow">CSV comparison</div>
+  <h2>ผลจากข้อมูล Noiseless</h2>
+  <p class="small">ตารางนี้เป็น RMSE ที่คำนวณจาก CSV เพื่ออ่านเทียบกับตาราง Weka ได้ง่าย ส่วนไฟล์ results ยังเก็บ MSE ด้วย</p>
+  <div class="table-wrap"><table id="noiselessTable"></table></div>
+  <div class="grid" style="margin-top:1rem">
+    <div class="card accent"><h3>ทำตารางนี้เพื่ออะไร?</h3><p class="small">ใช้ดูว่าการเพิ่ม n และ degree เปลี่ยนความผิดพลาดของโมเดลอย่างไรในกรณีที่ไม่มี noise</p></div>
+    <div class="card good"><h3>ได้อะไรจากตาราง?</h3><p class="small">ข้อมูลสะอาดทำให้ degree สูงฟิตได้ดี และเมื่อ n เพิ่ม ค่า CV เข้าใกล้ Training มากขึ้น</p></div>
+  </div>
+  <div class="callout" style="margin-top:1rem"><strong>อ่านผล:</strong> เมื่อไม่มี noise ดีกรี 8 ฟิตข้อมูล training ได้เกือบพอดี และ CV ลดลงมากเมื่อ n เพิ่ม เพราะข้อมูลสะอาดและมีมากขึ้น</div>
+  <div class="footer"><span>CSV: provided_data_metrics.csv</span><span>8</span></div>
+</section>
+
+<section class="slide" id="s9">
+  <div class="eyebrow">CSV comparison</div>
+  <h2>ผลจากข้อมูล Noisy</h2>
+  <p class="small">เมื่อมี noise ความแตกต่างระหว่าง degree 3 และ degree 8 เห็นได้ชัด โดยเฉพาะ n = 10</p>
+  <div class="table-wrap"><table id="noisyTable"></table></div>
+  <div class="grid" style="margin-top:1rem">
+    <div class="card accent"><h3>ทำตารางนี้เพื่ออะไร?</h3><p class="small">ใช้ตรวจว่าโมเดลกำลังเรียนรู้รูปแบบจริง หรือกำลังจำสัญญาณรบกวนในข้อมูล training</p></div>
+    <div class="card bad"><h3>ได้อะไรจากตาราง?</h3><p class="small">ถ้า Training ต่ำมากแต่ CV สูงมาก แปลว่าเกิด overfitting โดยเฉพาะ noisy n = 10, d = 8</p></div>
+  </div>
+  <div class="grid" style="margin-top:1rem">
+    <div class="card bad"><h3>n = 10, d = 8</h3><p><span class="bad-text">Training RMSE = 0.0607</span><br>แต่ <span class="bad-text">CV RMSE = 19.0424</span></p></div>
+    <div class="card good"><h3>n = 80, d = 3</h3><p>Training RMSE = 0.2737<br>CV RMSE = 0.2910</p></div>
+  </div>
+  <div class="footer"><span>Noise ทำให้ดีกรีสูงแกว่ง</span><span>9</span></div>
+</section>
+
+<section class="slide" id="s10">
+  <div class="eyebrow">Single dataset</div>
+  <h2>ข้อมูลชุดเดียว: Training vs CV vs True Eout</h2>
+  <div class="two-col">
+    <div>
+      <img class="graph tall" src="../plots/single_dataset.png" alt="Single dataset errors by degree">
+      <div class="caption">n = 20, σ = 0.3, 10-fold CV — ทุกเส้นในกราฟเป็น MSE</div>
+    </div>
+    <div class="card">
+      <h3>กราฟนี้ทำเพื่ออะไร?</h3>
+      <p class="small">ใช้เลือก degree สำหรับข้อมูลชุดหนึ่ง โดยดูว่าค่า Training, CV และ True Eout ต่ำสุดที่จุดใด</p>
+      <h3>ดูอะไรจากกราฟ?</h3>
+      <ul>
+        <li>เส้น Training ลดลงต่อเนื่อง และต่ำสุดที่ d = 8</li>
+        <li>เส้น CV ลดลงถึง d = 3 แล้วเพิ่มขึ้น</li>
+        <li>True Eout ต่ำสุดที่ d = 3</li>
+        <li>ดังนั้น CV เลือกดีกรีได้ตรงกับ Eout ในชุดนี้</li>
+      </ul>
+      <div class="callout"><strong>สรุปชุดนี้:</strong><br>Training → d = 8<br>CV → d = 3<br>True Eout → d = 3</div>
+    </div>
+  </div>
+  <div class="footer"><span>plots/single_dataset.png</span><span>10</span></div>
+</section>
+
+<section class="slide" id="s11">
+  <div class="eyebrow">How to read the curve</div>
+  <h2>ทำไม Training error เลือก d = 8 แต่ CV เลือก d = 3?</h2>
+  <div class="grid">
+    <div class="card">
+      <h3 class="good-text">ช่วง d = 0 → 3</h3>
+      <p>โมเดลเพิ่มความสามารถในการตามรูปทรงของ <span class="math">sin(πx)</span> ทำให้ทั้ง Ein, Ecv และ Eout ลดลง</p>
+    </div>
+    <div class="card">
+      <h3 class="bad-text">ช่วง d &gt; 3</h3>
+      <p>ความสามารถที่เพิ่มขึ้นเริ่มถูกใช้เพื่อจำ noise มากกว่ารูปแบบจริง ทำให้ Ein ยังลด แต่ Ecv/Eout เริ่มสูง</p>
+    </div>
+  </div>
+  <div class="formula">เลือกดีกรี = argmin<sub>d</sub> Ecv(d) &nbsp; ไม่ใช่ argmin<sub>d</sub> Ein(d)</div>
+  <p class="lead">นี่คือเหตุผลที่ CV เป็นวิธีเลือก model complexity ที่เหมาะกว่า training error เพียงอย่างเดียว</p>
+  <div class="footer"><span>Single dataset interpretation</span><span>11</span></div>
+</section>
+
+<section class="slide" id="s12">
+  <div class="eyebrow">Repeated simulation</div>
+  <h2>ทำซ้ำ 300 ชุดข้อมูล: เส้นโค้งเฉลี่ย</h2>
+  <div class="two-col">
+    <div>
+      <img class="graph tall" src="../plots/mean_errors.png" alt="Mean errors by degree across 300 datasets">
+      <div class="caption">ค่าเฉลี่ยจาก 300 datasets, n = 20, σ = 0.3</div>
+    </div>
+    <div class="card">
+      <h3>กราฟนี้ทำเพื่ออะไร?</h3>
+      <p class="small">ลดผลจากความบังเอิญของ dataset เดียว เพื่อดูแนวโน้มทั่วไปของแต่ละ degree</p>
+      <h3>ดูอะไรจากกราฟ?</h3>
+      <ul>
+        <li>Mean Ein ลดต่อเนื่องจนถึง d = 8</li>
+        <li>Mean Ecv ต่ำสุดประมาณ d = 3</li>
+        <li>Mean Eout ต่ำสุดประมาณ d = 3</li>
+        <li>หลัง d = 5 ความแปรปรวนทำให้ Ecv และ Eout สูงขึ้นอย่างรวดเร็ว</li>
+      </ul>
+      <div class="callout"><strong>ข้อสรุป:</strong> ค่าเฉลี่ยจากหลายชุดข้อมูลยืนยันว่า training error มี bias ไปทางโมเดลซับซ้อนเกินไป</div>
+    </div>
+  </div>
+  <div class="footer"><span>plots/mean_errors.png</span><span>12</span></div>
+</section>
+
+<section class="slide" id="s13">
+  <div class="eyebrow">Mean simulation table</div>
+  <h2>ค่าเฉลี่ยของ Ein, Ecv และ Eout ตามดีกรี</h2>
+  <div class="table-wrap"><table id="meanTable"></table></div>
+  <div class="callout" style="margin-top:1rem"><strong>ทำตารางนี้เพื่ออะไร?</strong> ใช้ยืนยันด้วยตัวเลขว่าการเลือก degree จาก Training error ให้คำตอบต่างจากการเลือกด้วย CV และ True Eout หรือไม่<br><strong>สิ่งที่ได้:</strong> d = 8 ให้ Mean Ein ต่ำสุด แต่ d = 3 ให้ Mean Ecv และ Mean Eout ต่ำสุด จึงเป็น degree ที่เหมาะกับการ generalize มากกว่า</div>
+  <div class="grid" style="margin-top:1.1rem">
+    <div class="card"><div class="kpi">d = 8</div><div class="kpi-label">Mean Ein ต่ำสุด = 0.0491</div></div>
+    <div class="card good"><div class="kpi">d = 3</div><div class="kpi-label">Mean Ecv ต่ำสุด = 0.1316</div></div>
+    <div class="card good"><div class="kpi">d = 3</div><div class="kpi-label">Mean Eout ต่ำสุด = 0.1245</div></div>
+  </div>
+  <div class="footer"><span>CSV: mean_random_simulation.csv</span><span>13</span></div>
+</section>
+
+<section class="slide" id="s14">
+  <div class="eyebrow">Degree selection</div>
+  <h2>เปรียบเทียบวิธีเลือกดีกรี</h2>
+  <div class="grid three">
+    <div class="card bad">
+      <h3>เลือกด้วย Training</h3>
+      <div class="kpi">d = 8</div>
+      <p class="small">เลือก d = 8 ถึง 100% ของ 300 datasets เพราะ Ein มักลดลงเมื่อเพิ่มพารามิเตอร์</p>
+    </div>
+    <div class="card good">
+      <h3>เลือกด้วย CV</h3>
+      <div class="kpi">d = 3</div>
+      <p class="small">เป็นค่าที่มีความถี่เลือกสูงสุด 63.3% และเป็นจุดต่ำสุดของค่าเฉลี่ย Ecv</p>
+    </div>
+    <div class="card accent">
+      <h3>อ้างอิง True Eout</h3>
+      <div class="kpi">d = 3</div>
+      <p class="small">เป็นจุดต่ำสุดของค่าเฉลี่ย Eout และสอดคล้องกับ CV</p>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:1.3rem"><strong>CV ใกล้ Eout แค่ไหน?</strong> ในช่วง d = 0–4 เส้น Ecv กับ Eout มีรูปทรงคล้ายกันมาก แต่เมื่อ d สูง ความแปรปรวนของการแบ่ง folds และโมเดลทำให้ CV แกว่งแรง</div>
+  <div class="footer"><span>Model selection</span><span>14</span></div>
+</section>
+
+<section class="slide" id="s15">
+  <div class="eyebrow">Coefficients</div>
+  <h2>ขนาดสัมประสิทธิ์สูงสุด |w| กับ Overfitting</h2>
+  <div class="two-col">
+    <div>
+      <img class="graph tall" src="../plots/coefficient_size.png" alt="Maximum coefficient magnitude versus degree">
+      <div class="caption">Median และ mean ของ max|w| จาก 300 datasets</div>
+    </div>
+    <div class="card">
+      <h3>กราฟนี้ทำเพื่ออะไร?</h3>
+      <p class="small">ใช้ตรวจความเสถียรของโมเดลผ่านขนาดสัมประสิทธิ์ ไม่ดูแค่ค่า error อย่างเดียว</p>
+      <h3>ดูอะไรจากกราฟ?</h3>
+      <ul>
+        <li>d = 0–2: ค่าสัมประสิทธิ์มีขนาดเล็ก</li>
+        <li>d = 3–4: เพิ่มขึ้น แต่ยังควบคุมได้</li>
+        <li>d = 5–8: ขนาด |w| โตเร็ว โดยเฉพาะเมื่อมี noise</li>
+      </ul>
+      <div class="callout"><strong>ความหมาย:</strong> โมเดลใช้ค่าสัมประสิทธิ์ขนาดใหญ่เพื่อสร้างเส้นที่แกว่งผ่านจุด training แต่เส้นนั้นไม่เสถียรเมื่อเจอข้อมูลใหม่</div>
+    </div>
+  </div>
+  <div class="footer"><span>plots/coefficient_size.png</span><span>15</span></div>
+</section>
+
+<section class="slide" id="s16">
+  <div class="eyebrow">Coefficient example</div>
+  <h2>ตัวอย่างค่าสัมประสิทธิ์จาก n = 10</h2>
+  <div class="grid">
+    <div class="card good">
+      <h3>Noisy, d = 3</h3>
+      <div class="formula">w ≈ [0.0108, 2.7772, 0.5232, −2.5980]</div>
+      <p>max|w| ≈ 2.78<br><span class="good-text">โมเดลยังมีรูปทรงเรียบ</span></p>
+    </div>
+    <div class="card bad">
+      <h3>Noisy, d = 8</h3>
+      <div class="formula">w ≈ [0.1999, 1.0153, −5.1034, 20.0053, 31.2838, −67.3317, −67.4224, 55.6246, 50.5487]</div>
+      <p>max|w| ≈ 67.42<br><span class="bad-text">ค่าสัมประสิทธิ์แกว่งและไวต่อ noise</span></p>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:1.3rem"><strong>สรุป:</strong> ไม่ใช่แค่ดีกรีที่สูงขึ้น แต่เป็นสเกลของ w ที่บอกว่าโมเดลเริ่มไม่เสถียรแล้วหรือยัง</div>
+  <div class="footer"><span>Coefficient comparison</span><span>16</span></div>
+</section>
+
+<section class="slide" id="s17">
+  <div class="eyebrow">Effect of n and σ</div>
+  <h2>เมื่อปรับจำนวนข้อมูลและระดับ noise</h2>
+  <div class="two-col">
+    <div>
+      <img class="graph tall" src="../plots/n_sigma_summary.png" alt="Effect of sample size and noise">
+      <div class="caption">ซ้าย: degree ที่ CV เลือก · ขวา: gap ระหว่าง Eout(D) กับ Ein(D)</div>
+    </div>
+    <div class="card">
+      <h3>กราฟนี้ทำเพื่ออะไร?</h3>
+      <p class="small">ใช้ศึกษาว่า sample size และ noise level ส่งผลต่อ degree ที่เลือกและความรุนแรงของ overfitting อย่างไร</p>
+      <h3>ดูอะไรจากกราฟ?</h3>
+      <ul>
+        <li>σ = 0: CV มักเลือกดีกรีสูงได้ เพราะข้อมูลสะอาด</li>
+        <li>σ = 0.3 หรือ 0.6 และ n = 10: CV ลดดีกรีลงมาก</li>
+        <li>เพิ่ม n: gap ของ d = 8 ลดลง เพราะข้อมูลช่วยควบคุมโมเดล</li>
+        <li>เพิ่ม σ: gap และขนาดสัมประสิทธิ์พุ่งสูงขึ้น</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer"><span>plots/n_sigma_summary.png</span><span>17</span></div>
+</section>
+
+<section class="slide" id="s18">
+  <div class="eyebrow">Sensitivity table</div>
+  <h2>ตารางสรุปผลของ n และ σ</h2>
+  <div class="grid three" style="margin-bottom:1rem">
+    <div class="card accent">
+      <h3>ตัวแปรข้อมูล</h3>
+      <p class="small"><b>n</b> = จำนวนตัวอย่างในชุดข้อมูล</p>
+      <p class="small"><b>σ</b> = ส่วนเบี่ยงเบนมาตรฐานของ noise ใน<br><span class="math">y = sin(πx) + ε</span></p>
+    </div>
+    <div class="card good">
+      <h3>ดีกรีที่เลือก</h3>
+      <p class="small"><b>best Ein</b> = degree ที่ทำให้ค่าเฉลี่ย Training MSE ต่ำสุด</p>
+      <p class="small"><b>best CV</b> = degree ที่ทำให้ค่าเฉลี่ย 10-fold CV MSE ต่ำสุด</p>
+      <p class="small"><b>best Eout</b> = degree ที่ทำให้ค่าเฉลี่ย True Eout ต่ำสุด</p>
+    </div>
+    <div class="card warn">
+      <h3>ตัวชี้วัด Overfitting</h3>
+      <p class="small"><b>gap@D</b> = Eout(D) − Ein(D)<br>ในงานนี้ D = 8</p>
+      <p class="small"><b>median max|w|@D</b> = มัธยฐานของค่าสัมประสิทธิ์ที่มีขนาดมากที่สุดของ degree 8</p>
+    </div>
+  </div>
+  <div class="table-wrap"><table id="sensitivityTable"></table></div>
+  <div class="callout" style="margin-top:1rem"><strong>ทำตารางนี้เพื่ออะไร?</strong> ใช้สรุปผลการทดลองทุกคู่ของ n และ σ ในแถวเดียว เพื่อเปรียบเทียบการเลือก degree และขนาด overfitting อย่างเป็นระบบ</div>
+  <p class="small" style="margin-top:1rem"><b>การตีความ:</b> gap@D ยิ่งมาก หมายถึง degree 8 ทำคะแนนบน train ดี แต่ทำนายข้อมูลใหม่แย่กว่าเดิมมาก จึงมี overfitting รุนแรง ส่วน median max|w|@D ยิ่งมาก แสดงว่าเส้น polynomial มีความไม่เสถียรและไวต่อ noise มากขึ้น</p>
+  <div class="callout"><strong>ตัวอย่าง:</strong> n = 10, σ = 0.3 มี gap@D ≈ 37,291,336 ซึ่งรุนแรงมาก ขณะที่ n = 80, σ = 0.3 เหลือประมาณ 0.0241</div>
+  <div class="footer"><span>CSV: n_sigma_summary.csv</span><span>18</span></div>
+</section>
+
+<section class="slide" id="s19">
+  <div class="eyebrow">Interpretation</div>
+  <h2>เรื่องเดียวกันมองผ่าน Bias–Variance ได้อย่างไร?</h2>
+  <div class="grid three">
+    <div class="card warn"><h3>d ต่ำเกินไป</h3><p><span class="warn-text">Underfitting</span><br>โมเดลยืดหยุ่นไม่พอ จับรูป sin(πx) ได้ไม่ดี → bias สูง</p></div>
+    <div class="card good"><h3>d พอดี</h3><p><span class="good-text">Good generalization</span><br>ตามรูปทรงจริงได้ และไม่ขยาย noise → CV/Eout ต่ำ</p></div>
+    <div class="card bad"><h3>d สูงเกินไป</h3><p><span class="bad-text">Overfitting</span><br>variance สูง, |w| โต, training ต่ำ แต่ข้อมูลใหม่แย่</p></div>
+  </div>
+  <div class="formula">Expected test error ≈ Bias² + Variance + Noise</div>
+  <p class="lead">การเพิ่ม degree ลด bias ในช่วงแรก แต่หลังจากจุดเหมาะสม variance จะเพิ่มเร็วกว่าประโยชน์ที่ได้</p>
+  <div class="footer"><span>Bias–variance interpretation</span><span>19</span></div>
+</section>
+
+<section class="slide" id="s20">
+  <div class="eyebrow">สรุปผล</div>
+  <h2>สรุปผล</h2>
+  <div class="grid">
+    <div class="card good">
+      <h3>ผลหลัก</h3>
+      <ul>
+        <li>Training error ไม่เหมาะใช้เลือก degree เพียงอย่างเดียว</li>
+        <li>CV เลือก d = 3 ซึ่งตรงกับ minimum ของ mean True Eout</li>
+        <li>degree 8 แสดง overfitting ชัดเจนเมื่อมี noise และ n น้อย</li>
+      </ul>
+    </div>
+    <div class="card accent">
+      <h3>ผลจาก n และ σ</h3>
+      <ul>
+        <li>เพิ่ม n ช่วยลดความผันผวนของสัมประสิทธิ์</li>
+        <li>เพิ่ม σ ทำให้ high-degree model ไม่เสถียร</li>
+        <li>max|w| เป็นสัญญาณประกอบของ overfitting</li>
+      </ul>
+    </div>
+  </div>
+  <div class="formula">คำตอบเชิงปฏิบัติ: ใช้ CV เลือก degree แล้วฟิตโมเดลสุดท้ายด้วยข้อมูลทั้งหมด</div>
+  <div class="footer"><span>Conclusion</span><span>20</span></div>
+</section>
+
+</main>
+
+<div class="controls">
+  <button id="prev" aria-label="previous slide">←</button>
+  <button id="next" aria-label="next slide">→</button>
+</div>
+
+<script>
+const provided = [
+["noiseless",10,1,.4614819357,.6066152159],["noiseless",10,3,.0728956683,.1900395357],["noiseless",10,8,.0000179436,.0056325643],
+["noiseless",20,1,.4475206703,.5056411613],["noiseless",20,3,.0686073303,.1048840437],["noiseless",20,8,.0001077818,.0010676793],
+["noiseless",40,1,.4439553609,.4595544574],["noiseless",40,3,.0668947695,.0797846456],["noiseless",40,8,.0001433466,.0003765317],
+["noiseless",80,1,.4430591924,.4581912031],["noiseless",80,3,.0664203809,.0720026761],["noiseless",80,8,.0001531852,.0002244921],
+["noisy",10,1,.5727988547,.7483244572],["noisy",10,3,.2265474392,.4280519971],["noisy",10,8,.0606631107,19.0423650456],
+["noisy",20,1,.4315937111,.4937491679],["noisy",20,3,.2719594572,.3862638834],["noisy",20,8,.1935771709,.8802577249],
+["noisy",40,1,.5444717783,.5707803114],["noisy",40,3,.2929029924,.3195314428],["noisy",40,8,.2718108511,.3884071705],
+["noisy",80,1,.4990482512,.5133968594],["noisy",80,3,.2736911223,.2909573723],["noisy",80,8,.2577662815,.2979128038]
+];
+const mean = [
+[0,.5645200916,.6262077407,.6143696699,.1052503154],[1,.2540102187,.3248992593,.3178669996,.9593824428],
+[2,.2311751348,.4004452788,.3666933143,1.0173786256],[3,.0733730972,.1315815172,.1245418809,2.9173313053],
+[4,.0683228335,.1904495137,.1818518998,3.0046047285],[5,.0624658371,.6066509317,.4668799550,4.7994659687],
+[6,.0584710489,3.4640284418,1.2954410735,6.8186677599],[7,.0539895620,350.5219603565,13.0969763276,15.5834237113],
+[8,.0490617119,2748.0413590677,139.3312352524,48.1781814392]
+];
+const sensitivity = [
+[10,0,8,7,8,.0003925,5.1651],[20,0,8,7,7,.0000224,5.1552],[40,0,8,7,7,.0000003,5.1473],[80,0,8,7,7,.00000004,5.1435],
+[10,.3,8,1,1,37291336.3341,609.9440],[20,.3,8,3,3,178.4451,51.6275],[40,.3,8,3,3,.0951,21.2073],[80,.3,8,3,3,.0241,12.1994],
+[10,.6,8,1,1,525217180.4007,2121.6157],[20,.6,8,3,3,12898.0195,111.3410],[40,.6,8,3,3,3.5162,51.3845],[80,.6,8,3,3,.0887,28.8648]
+];
+function fmt(x){return Number(x).toLocaleString("en-US",{maximumFractionDigits:4})}
+function table(id,head,rows){
+  document.getElementById(id).innerHTML="<thead><tr>"+head.map(x=>"<th>"+x+"</th>").join("")+"</tr></thead><tbody>"+
+    rows.map(r=>"<tr>"+r.map(x=>"<td>"+x+"</td>").join("")+"</tr>").join("")+"</tbody>"
+}
+table("noiselessTable",["n","degree","Training RMSE","CV RMSE"],provided.filter(r=>r[0]==="noiseless").map(r=>[r[1],r[2],fmt(r[3]),fmt(r[4])]));
+table("noisyTable",["n","degree","Training RMSE","CV RMSE"],provided.filter(r=>r[0]==="noisy").map(r=>[r[1],r[2],fmt(r[3]),fmt(r[4])]));
+table("meanTable",["degree","Mean Ein","Mean Ecv","Mean Eout","Median max|w|"],mean.map(r=>[r[0],fmt(r[1]),fmt(r[2]),fmt(r[3]),fmt(r[4])]));
+table("sensitivityTable",["n","σ","best Ein","best CV","best Eout","gap@D","median max|w|@D"],sensitivity.map(r=>[r[0],r[1],r[2],r[3],r[4],fmt(r[5]),fmt(r[6])]));
+
+const slides=[...document.querySelectorAll(".slide")];
+let current=Math.max(0,slides.findIndex(s=>s.id===location.hash.slice(1)));
+function show(i){
+  current=Math.max(0,Math.min(slides.length-1,i));
+  slides[current].scrollIntoView({behavior:"smooth"});
+  history.replaceState(null,"","#"+slides[current].id);
+}
+document.getElementById("prev").onclick=()=>show(current-1);
+document.getElementById("next").onclick=()=>show(current+1);
+document.addEventListener("keydown",e=>{
+  if(["ArrowRight","PageDown"," "].includes(e.key)){e.preventDefault();show(current+1)}
+  if(["ArrowLeft","PageUp"].includes(e.key)){e.preventDefault();show(current-1)}
+  if(e.key==="Home"){e.preventDefault();show(0)}
+  if(e.key==="End"){e.preventDefault();show(slides.length-1)}
+});
+window.addEventListener("hashchange",()=>{const i=slides.findIndex(s=>s.id===location.hash.slice(1));if(i>=0)show(i)});
+show(current);
+</script>
+</body>
+</html>
