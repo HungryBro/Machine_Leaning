@@ -6,7 +6,8 @@
 python3 HW4.py
 ```
 
-ค่าเริ่มต้นรันครบ 4 ข้อ และสร้างกราฟ likelihood, posterior และ decision boundary ลงในโฟลเดอร์ `output/`
+ค่าเริ่มต้นรันครบ 4 ข้อ และสร้างกราฟ likelihood, posterior และ decision boundary ลงในโฟลเดอร์ `output/` ข้อละหนึ่งภาพ
+พร้อมพิมพ์พารามิเตอร์ที่ใช้จริงและ decision boundary ให้อ่านง่ายบน terminal หากปรับค่าแล้วรันซ้ำ ภาพของข้อนั้นจะถูกเขียนทับ
 
 | ข้อ | ชุดคำสั่งในโค้ด | ขอบตัดสินใจ |
 |---:|---|---|
@@ -25,13 +26,11 @@ PARAMETER_MODE = "manual"
 N_SAMPLES = 120
 RANDOM_SEED = 42
 PRIOR_C0 = 0.50
-RUN_SENSITIVITY_DEMO = True
 ```
 
 - `SCENARIO_TO_RUN`: เลือก `"all"`, `"equal_1d"`, `"unequal_1d"`, `"qda_2d"` หรือ `"lda_2d"`
 - `PARAMETER_MODE`: `"manual"` ใช้ค่าที่กำหนด; `"estimate"` สุ่มข้อมูล `N_SAMPLES` จุด แล้ว estimate mean, covariance และ prior ด้วย MLE
 - `PRIOR_C0`: prior ของ C0 โดย prior ของ C1 คือ `1 - PRIOR_C0`
-- `RUN_SENSITIVITY_DEMO`: `True` จะสร้างกราฟทดลองผลของ `n`, `μ`, `σ` และ prior เพิ่ม; ตั้งเป็น `False` หากต้องการเฉพาะกราฟหลัก
 
 ## ปรับ μ, σ และ covariance
 
@@ -49,7 +48,6 @@ RUN_SENSITIVITY_DEMO = True
 ```python
 SCENARIO_TO_RUN = "equal_1d"
 ONE_D_PARAMETERS["equal_1d"]["mu"] = [-0.5, 0.5]
-RUN_SENSITIVITY_DEMO = False
 ```
 
 หรือปรับ `N_SAMPLES = 20` แล้วเลือก `PARAMETER_MODE = "estimate"` เพื่อดูความแปรปรวนของ parameter ที่ estimate เมื่อมีข้อมูลน้อย

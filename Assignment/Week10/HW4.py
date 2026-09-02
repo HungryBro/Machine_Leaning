@@ -28,7 +28,6 @@ PARAMETER_MODE = "manual"
 N_SAMPLES = 120
 RANDOM_SEED = 42
 PRIOR_C0 = 0.50                 # P(C1) = 1 - PRIOR_C0
-RUN_SENSITIVITY_DEMO = True     # สร้างกราฟทดลอง n, μ, σ, prior เพิ่ม
 
 # 1D: mu = [mu_C0, mu_C1], sigma = [sigma_C0, sigma_C1]
 # equal_1d ต้องมี sigma สองค่าที่เท่ากัน
@@ -65,15 +64,15 @@ LABELS = {
 }
 
 
-def make_model(case, prior, changed=None):
-    """สร้าง model = {mu, cov, prior}; changed ใช้เฉพาะชุดทดลอง demo."""
+def make_model(case, prior):
+    """สร้าง model = {mu, cov, prior} จากค่าที่กำหนดไว้ใน SETTINGS."""
     if case in ONE_D_PARAMETERS:
-        p = {**ONE_D_PARAMETERS[case], **(changed or {})}
+        p = ONE_D_PARAMETERS[case]
         mu = np.asarray(p["mu"], dtype=float)[:, None]
         sigma = np.asarray(p["sigma"], dtype=float)
         cov = np.array([[[s ** 2]] for s in sigma])
     else:
-        p = {**TWO_D_PARAMETERS[case], **(changed or {})}
+        p = TWO_D_PARAMETERS[case]
         mu, cov = np.asarray(p["mu"], dtype=float), np.asarray(p["cov"], dtype=float)
 
     # โจทย์ข้อ 1 และ 4 บังคับใช้ covariance เดียวกัน
@@ -218,13 +217,31 @@ def plot_2d(model, X, y, title, filename):
     plt.close(fig)
 
 
-def run(case, mode, n, prior, tag="", changed=None):
-    true_model = make_model(case, prior, changed)
-    rng = np.random.default_rng(RANDOM_SEED + sum(map(ord, case + tag)))
+def print_summary(case, mode, n, model, boundary, filename):
+    """พิมพ์พารามิเตอร์ที่ตัวจำแนกใช้จริงให้อ่านง่ายบน terminal."""
+    print("\n" + "=" * 68)
+    print(LABELS[case])
+    print(f"โหมด: {'กำหนดพารามิเตอร์เอง' if mode == 'manual' else 'สุ่มข้อมูลและ estimate แบบ MLE'} | n = {n}")
+    for k in (0, 1):
+        mu, cov, prior = model["mu"][k], model["cov"][k], model["prior"][k]
+        if len(mu) == 1:
+            variance = cov[0, 0]
+            print(f"C{k}: μ = {mu[0]:.3f}, variance = {variance:.3f}, σ = {np.sqrt(variance):.3f}, prior = {prior:.3f}")
+        else:
+            print(f"C{k}: μ = {np.array2string(mu, precision=3)}, prior = {prior:.3f}")
+            print(f"    covariance = {np.array2string(cov, precision=3)}")
+    print(f"Decision boundary: {boundary}")
+    print(f"Saved graph: {filename}")
+
+
+def run(case, mode, n, prior):
+    true_model = make_model(case, prior)
+    rng = np.random.default_rng(RANDOM_SEED + sum(map(ord, case)))
     X, y = sample(true_model, n, rng)
     common = case in ("equal_1d", "lda_2d")
     model = true_model if mode == "manual" else estimate(X, y, common)
-    filename = OUTPUT_DIRECTORY / f"{case}_{mode}{tag}.png"
+    # รันซ้ำหลังปรับค่า จะเขียนทับภาพของข้อนั้น เพื่อให้ output มีเพียง 4 ภาพ
+    filename = OUTPUT_DIRECTORY / f"{case}.png"
     title = f"{LABELS[case]} | mode={mode}, n={n}"
 
     if model["mu"].shape[1] == 1:
@@ -233,22 +250,7 @@ def run(case, mode, n, prior, tag="", changed=None):
     else:
         plot_2d(model, X, y, title, filename)
         boundary = "curve (QDA)" if case == "qda_2d" else "line (LDA)"
-    print(f"{case}: {boundary} -> {filename.name}")
-
-
-def run_demo():
-    """สร้างหลักฐานการเปลี่ยนแปลงของ n, μ, σ และ prior ตามโจทย์."""
-    demos = [
-        ("equal_1d", "estimate", 20,  .50, "_n20", None),
-        ("equal_1d", "estimate", 400, .50, "_n400", None),
-        ("equal_1d", "manual",   80,  .50, "_mu_close", {"mu": [-.5, .5], "sigma": [1, 1]}),
-        ("equal_1d", "manual",   80,  .50, "_mu_far", {"mu": [-2, 2], "sigma": [1, 1]}),
-        ("unequal_1d", "manual", 80,  .50, "_sigma_unequal", {"mu": [-1, 1], "sigma": [.55, 1.8]}),
-        ("lda_2d", "manual",    120, .80, "_prior_c0_080", None),
-    ]
-    print("\nDEMO: n, μ, σ and prior")
-    for case, mode, n, prior, tag, changed in demos:
-        run(case, mode, n, prior, tag, changed)
+    print_summary(case, mode, n, model, boundary, filename.name)
 
 
 def main():
@@ -259,8 +261,6 @@ def main():
     OUTPUT_DIRECTORY.mkdir(exist_ok=True)
     for case in CASES if SCENARIO_TO_RUN == "all" else (SCENARIO_TO_RUN,):
         run(case, PARAMETER_MODE, N_SAMPLES, PRIOR_C0)
-    if RUN_SENSITIVITY_DEMO:
-        run_demo()
 
 
 if __name__ == "__main__":
